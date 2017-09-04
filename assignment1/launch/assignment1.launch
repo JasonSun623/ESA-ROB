@@ -5,4 +5,8 @@
   <group ns="draw_triangle_node">
     <node pkg="assignment1" name="draw" type="draw_triangle_node"/>
   </group>
+  <node pkg="turtlesim" name="draw" type="draw_triangle_node">
+    <remap from="input" to="draw_triangle_node/cmd_vel"/>
+    <remap from="output" to="turtlesim/turtlesim_node"/>
+  </node> 
 </launch>
