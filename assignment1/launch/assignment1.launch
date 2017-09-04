@@ -1,12 +1,6 @@
 <launch>
-  <group ns="turtlesim_node">
-    <node pkg="turtlesim" name="sim" type="turtlesim_node"/>
-  </group>
-  <group ns="draw_triangle_node">
-    <node pkg="assignment1" name="draw" type="draw_triangle_node"/>
-  </group>
-  <node pkg="turtlesim" name="draw" type="draw_triangle_node">
-    <remap from="input" to="draw_triangle_node/cmd_vel"/>
-    <remap from="output" to="turtlesim/turtlesim_node"/>
-  </node> 
+    <node pkg="turtlesim" name="turle1" type="turtlesim_node"/>
+    <node pkg="assignment1" name="draw_triangle" type="draw_triangle_node">
+      <remap from="cmd_vel" to="/turtle1/cmd_vel"/>
+    </node>
 </launch>
