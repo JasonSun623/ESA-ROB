@@ -1,13 +1,15 @@
 #include "ros/ros.h"
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/String.h>
+#include <assignment1/Triangle.h>
 
 
 #include <sstream>
 
-void cmdCallback(const std_msgs::String::ConstPtr& msg)
+void cmdCallback(const assignment1::Triangle::ConstPtr& msg)
 {
-  ROS_INFO("I heard: [%s]", msg->data.c_str());
+  ROS_INFO("I heard: [%f]", msg->sideLength);
+  ROS_INFO("I heard: [%d]", msg->cw);
 }
 
 
