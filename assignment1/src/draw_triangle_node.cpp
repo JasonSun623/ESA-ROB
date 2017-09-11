@@ -87,6 +87,15 @@ void setInitialOrientation (double desired_angle_radians){
 
 
 void cmdCallback(const assignment1::Triangle::ConstPtr& msg) {
+	ros::Rate loop_rate(100);
+	pen.request.off = 0;
+
+	while (!pen_srv.call(pen)) {
+		loop_rate.sleep();
+	}
+
+
+
 	ROS_INFO("I heard: [%f]", msg->sideLength);
 	ROS_INFO("I heard: [%d]", msg->cw);
 
@@ -125,7 +134,8 @@ void cmdCallback(const assignment1::Triangle::ConstPtr& msg) {
 	move(moveSpeed, moveDist, true);
 	rotate(rotSpeed, rotRadians, cw);
 	move(moveSpeed, moveDist, true);
-
+	
+	//rotate(rotSpeed, rotRadians, cw);
 
 	ROS_INFO("rot pre: %f\n", turtlesim_pose.theta);
 
@@ -137,7 +147,10 @@ void cmdCallback(const assignment1::Triangle::ConstPtr& msg) {
 
 	ROS_INFO("rot post: %f\n", turtlesim_pose.theta);
 	ros::spinOnce();
-	
+	pen.request.off = 1;
+	while (!pen_srv.call(pen)) {
+		loop_rate.sleep();
+	}
 }
 
 void poseCallback(const turtlesim::Pose::ConstPtr & pose_message) {
@@ -159,15 +172,13 @@ int main(int argc, char **argv) {
 	velocity_publisher = n.advertise<geometry_msgs::Twist>("cmd_vel", 1000);
 	ros::Subscriber sub = n.subscribe("cmd", 1000, cmdCallback);
 	ros::Subscriber poseSubscriber = n.subscribe("/turtle1/pose", 1000, poseCallback);
-
+	ros::Rate loop_rate(100);
+	
 	pen_srv = n.serviceClient<turtlesim::SetPen>("turtle1/set_pen");
 	pen.request.r = 255;
 	pen.request.g = 0;
 	pen.request.b = 0;
-	pen.request.width = 0;
-
-	ros::Rate loop_rate(100);
-	
+	pen.request.width = 0;	
 	while (!pen_srv.call(pen)) {
 		loop_rate.sleep();
 	}
