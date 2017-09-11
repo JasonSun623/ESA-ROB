@@ -23,3 +23,4 @@ This implements the following requirements::
 * `rostopic pub -1 /cmd assignment1/Triangle -- 1.2 true`
 
 ## ROS comuptation graph
+[ROS Computation Graph](rosgraph.svg)
