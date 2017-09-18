@@ -18,6 +18,7 @@ This implements the following requirements::
 * `cd ~/catkin_ws`
 * `catkin_make`
 * `catkin_make install`
+* `source devel/setup.bash`
 * `roscore`
 * `roslaunch assignment1 assignment1.launch`
 * `rostopic pub -1 /cmd assignment1/Triangle -- 1.2 true`
