@@ -44,6 +44,8 @@ We noticed the turtle having a slight inaccuracy while rotating and moving, but 
 * `roslaunch assignment1 assignment1.launch`
 * `rostopic pub -1 /cmd assignment1/Triangle -- 1.2 true`
 
+[Demo](https://youtu.be/keSguKYp9J0)
+
 ## ROS comuptation graph
 ![ROS Computation Graph](rosgraph.svg)
 
