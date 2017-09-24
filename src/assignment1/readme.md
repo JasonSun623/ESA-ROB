@@ -1,6 +1,6 @@
-# ESA-ROB
+# ESA-ROB Assignment 1
 
-Assignment 1. This will create a node that draws a triangle using the turtlesim simulator.  
+This will create a node that draws a triangle using the turtlesim simulator.  
 
 This implements the following requirements::
 * The node should subscribe to a topic called /cmd. On this topic it should be able to receive Triangle messages, defined as follows:  
@@ -46,6 +46,6 @@ We noticed the turtle having a slight inaccuracy while rotating and moving, but 
 
 [Demo](https://youtu.be/keSguKYp9J0)
 
-## ROS comuptation graph
+## ROS computation graph
 ![ROS Computation Graph](rosgraph.svg)
 
