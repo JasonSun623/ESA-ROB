@@ -64,6 +64,10 @@ double rad2deg(double rad) {
     return (rad*(180/M_PI));
 }
 
+double deg2rad(double deg) {
+    return (deg*M_PI/180);
+}
+
 void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
     geometry_msgs::Pose goal = msg->pose;
 
@@ -76,6 +80,8 @@ void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
 
     ROS_INFO("planned heading: %lf\n", rad2deg(angle));
     ROS_INFO("pre heading    : %lf\n", rad2deg(yaw));
+
+    if (yaw > angle) angle += deg2rad(360.0);
     rotate(1.0, angle-yaw);
 
     toEulerianAngle(currentPose.orientation, pitch, roll, yaw);    
