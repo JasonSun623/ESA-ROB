@@ -40,14 +40,14 @@ void rotate (double angular_speed, double relative_angle){
 
 	double t0 = ros::Time::now().toSec();
 	double current_angle = 0.0;
-	ros::Rate loop_rate(1000);
-	do{
+	ros::Rate loop_rate(100);
+	while (current_angle<relative_angle) {
 		pubVelCmd.publish(vel_msg);
 		double t1 = ros::Time::now().toSec();
 		current_angle = angular_speed * (t1-t0);
 		ros::spinOnce();
 		loop_rate.sleep();
-	}while(current_angle<relative_angle);
+	}
 	
 	//force the robot to stop when it reaches the desired angle
 	vel_msg.angular.z = 0;
@@ -74,11 +74,13 @@ void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
 
     toEulerianAngle(currentPose.orientation, pitch, roll, yaw);
 
-    ROS_INFO("planned_heading: %lf\n", rad2deg(angle));
-    ROS_INFO("my_heading(yaw): %lf\n", rad2deg(yaw));
-    
+    ROS_INFO("planned heading: %lf\n", rad2deg(angle));
+    ROS_INFO("pre heading    : %lf\n", rad2deg(yaw));
     rotate(1.0, angle-yaw);
 
+    toEulerianAngle(currentPose.orientation, pitch, roll, yaw);    
+    ROS_INFO("post_heading   : %lf\n", rad2deg(yaw));
+    
 }
 
 void cbOdom(const nav_msgs::Odometry::ConstPtr &msg) {
@@ -90,7 +92,7 @@ int main(int argc, char **argv) {
 	ros::NodeHandle n;
     ros::Subscriber subGoal = n.subscribe("/goal", 100, cbGoal);
     ros::Subscriber subOdom = n.subscribe("/odom", 100, cbOdom);
-    pubVelCmd = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
+    pubVelCmd = n.advertise<geometry_msgs::Twist>("/cmd_vel", 100);
     
 	ros::spin();
 
