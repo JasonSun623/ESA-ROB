@@ -198,8 +198,12 @@ include_directories(
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(draw_triangle_node src/draw_triangle_node.cpp)
-target_link_libraries(draw_triangle_node ${catkin_LIBRARIES})
-add_dependencies(draw_triangle_node assignment1_generate_messages_cpp)
+add_executable(pointshoot_node src/pointshoot_node.cpp)
+target_link_libraries(pointshoot_node ${catkin_LIBRARIES})
+add_dependencies(pointshoot_node assignment2_generate_messages_cpp)
+
+add_executable(servoing_node src/servoing_node.cpp)
+target_link_libraries(servoing_node ${catkin_LIBRARIES})
+add_dependencies(servoing_node assignment2_generate_messages_cpp)
 
 
