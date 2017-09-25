@@ -1,0 +1,6 @@
+<launch>
+    <!--node pkg="turtlesim" name="turle1" type="turtlesim_node"/>
+    <node pkg="assignment1" name="draw_triangle" type="draw_triangle_node">
+      <remap from="cmd_vel" to="/turtle1/cmd_vel"/>
+    </node-->
+</launch>
