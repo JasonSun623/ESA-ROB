@@ -41,7 +41,7 @@ static void toEulerianAngle( geometry_msgs::Quaternion& q, double& roll, double&
  * Taken from the previous assignment, which took it from this source:
  * 
  */
-void rotate (double angular_speed, double relative_angle){	
+void rotate(double angular_speed, double relative_angle){	
 
 	double ang_speed_sgn = angular_speed > 0.0 ? 1.0 : -1.0;
 
@@ -66,17 +66,44 @@ void rotate (double angular_speed, double relative_angle){
 	pubVelCmd.publish(vel_msg);
 }
 
+void shoot(double speed, double distance) {
+	speed = fabs(speed);
+	geometry_msgs::Twist vel_msg;
+	
+	vel_msg.linear.x = speed;
+
+	double t0 = ros::Time::now().toSec();
+	double current_distance = 0.0;
+	ros::Rate loop_rate(100);
+	do {
+		pubVelCmd.publish(vel_msg);
+		double t1 = ros::Time::now().toSec();
+		current_distance = speed * (t1-t0);
+		ros::spinOnce();
+		loop_rate.sleep();
+	} while(current_distance<distance);
+	
+	vel_msg.linear.x = 0;
+	pubVelCmd.publish(vel_msg);
+}
+
 double getAngleBetweenPoses2D(geometry_msgs::Pose p1, geometry_msgs::Pose p2) {
     float dx = p2.position.x - p1.position.x;
     float dy = p2.position.y - p1.position.y;
     return (atan2(dy, dx));
 }
 
+double getDistBetweenPoses2D(geometry_msgs::Pose p1, geometry_msgs::Pose p2) {
+    float dx = p2.position.x - p1.position.x;
+	float dy = p2.position.y - p1.position.y;
+    return (sqrt(dx*dx+dy*dy));
+}
+
 void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
     geometry_msgs::Pose goal = msg->pose;
 
     double angle = getAngleBetweenPoses2D(currentPose, goal);
-
+	double distance = getDistBetweenPoses2D(currentPose, goal);
     
     double pitch, roll, yaw;
 
@@ -93,7 +120,9 @@ void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
 	rotate(speed, fabs(smallest_angle));
 
     toEulerianAngle(currentPose.orientation, pitch, roll, yaw);    
-    ROS_INFO("post_heading   : %lf\n", rad2deg(yaw));
+	ROS_INFO("post_heading   : %lf\n", rad2deg(yaw));
+	
+	shoot(1.0, distance);
     
 }
 
