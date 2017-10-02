@@ -5,6 +5,7 @@
 #include <geometry_msgs/PoseWithCovariance.h>
 #include <nav_msgs/Odometry.h>
 #include <math.h>
+#include <tf/transform_datatypes.h>
 
 ros::Publisher pubVelCmd;
 geometry_msgs::Pose currentPose;
@@ -15,26 +16,6 @@ double rad2deg(double rad) {
 
 double deg2rad(double deg) {
     return (deg*M_PI/180);
-}
-
-// taken from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles 
-static void toEulerianAngle( geometry_msgs::Quaternion& q, double& roll, double& pitch, double& yaw) {
-    // roll (x-axis rotation)
-	double sinr = +2.0 * (q.w * q.x + q.y * q.z);
-	double cosr = +1.0 - 2.0 * (q.x * q.x + q.y * q.y);
-	roll = atan2(sinr, cosr);
-
-	// pitch (y-axis rotation)
-	double sinp = +2.0 * (q.w * q.y - q.z * q.x);
-	if (fabs(sinp) >= 1)
-		pitch = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
-	else
-	    pitch = asin(sinp);
-
-	// yaw (z-axis rotation)
-	double siny = +2.0 * (q.w * q.z + q.x * q.y);
-	double cosy = +1.0 - 2.0 * (q.y * q.y + q.z * q.z);  
-	yaw = atan2(siny, cosy);
 }
 
 /*
@@ -99,31 +80,44 @@ double getDistBetweenPoses2D(geometry_msgs::Pose p1, geometry_msgs::Pose p2) {
     return (sqrt(dx*dx+dy*dy));
 }
 
+// taken from https://stackoverflow.com/questions/1878907/the-smallest-difference-between-2-angles
+double getSmallestAngle(double a, double b) {
+	double smallest_angle = a - b;
+	smallest_angle += (smallest_angle > M_PI) ? -2.0*M_PI : (smallest_angle < -M_PI) ? 2.0*M_PI : 0.0;
+	return smallest_angle;
+}
+
 void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
-    geometry_msgs::Pose goal = msg->pose;
-
-    double angle = getAngleBetweenPoses2D(currentPose, goal);
-	double distance = getDistBetweenPoses2D(currentPose, goal);
+    double angle = getAngleBetweenPoses2D(currentPose, msg->pose);
+	double distance = getDistBetweenPoses2D(currentPose, msg->pose);
     
-    double pitch, roll, yaw;
-
-    toEulerianAngle(currentPose.orientation, pitch, roll, yaw);
+    double yaw = tf::getYaw(currentPose.orientation);
 
     ROS_INFO("planned heading: %lf\n", rad2deg(angle));
     ROS_INFO("pre heading    : %lf\n", rad2deg(yaw));
 
-	double smallest_angle = angle - yaw;
-	smallest_angle += (smallest_angle > M_PI) ? -2.0*M_PI : (smallest_angle < -M_PI) ? 2.0*M_PI : 0.0;
+	double smallest_angle = getSmallestAngle(angle, yaw);
 
 	double speed = 1.0;
 	if (smallest_angle < 0.0) speed = -1.0;
 	rotate(speed, fabs(smallest_angle));
 
-    toEulerianAngle(currentPose.orientation, pitch, roll, yaw);    
+	yaw = tf::getYaw(currentPose.orientation);
 	ROS_INFO("post_heading   : %lf\n", rad2deg(yaw));
 	
 	shoot(1.0, distance);
-    
+	
+	// update again
+	ros::spinOnce();
+	yaw = tf::getYaw(currentPose.orientation);	
+
+	double gYaw = tf::getYaw(msg->pose.orientation);
+	ROS_INFO("final heading  : %lf\n", rad2deg(gYaw));
+	
+	double final_angle = getSmallestAngle(gYaw, yaw);
+	speed = 1.0;
+	if (final_angle < 0.0) speed = -1.0;
+	rotate(speed, fabs(final_angle));
 }
 
 void cbOdom(const nav_msgs::Odometry::ConstPtr &msg) {
@@ -141,4 +135,3 @@ int main(int argc, char **argv) {
 
 	return 0;
 }
-
