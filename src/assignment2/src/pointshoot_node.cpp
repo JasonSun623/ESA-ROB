@@ -9,6 +9,14 @@
 ros::Publisher pubVelCmd;
 geometry_msgs::Pose currentPose;
 
+double rad2deg(double rad) {
+    return (rad*(180/M_PI));
+}
+
+double deg2rad(double deg) {
+    return (deg*M_PI/180);
+}
+
 // taken from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles 
 static void toEulerianAngle( geometry_msgs::Quaternion& q, double& roll, double& pitch, double& yaw) {
     // roll (x-axis rotation)
@@ -18,9 +26,9 @@ static void toEulerianAngle( geometry_msgs::Quaternion& q, double& roll, double&
 
 	// pitch (y-axis rotation)
 	double sinp = +2.0 * (q.w * q.y - q.z * q.x);
-        if (fabs(sinp) >= 1)
-            pitch = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
-        else
+	if (fabs(sinp) >= 1)
+		pitch = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+	else
 	    pitch = asin(sinp);
 
 	// yaw (z-axis rotation)
@@ -34,17 +42,21 @@ static void toEulerianAngle( geometry_msgs::Quaternion& q, double& roll, double&
  * 
  */
 void rotate (double angular_speed, double relative_angle){	
+
+	double ang_speed_sgn = angular_speed > 0.0 ? 1.0 : -1.0;
+
 	geometry_msgs::Twist vel_msg;
 
-	vel_msg.angular.z = abs(angular_speed);
+	vel_msg.angular.z = angular_speed;
 
 	double t0 = ros::Time::now().toSec();
-	double current_angle = 0.0;
+	double rotated_angle = 0.0;
 	ros::Rate loop_rate(100);
-	while (current_angle<relative_angle) {
+
+	while (rotated_angle < relative_angle) {
 		pubVelCmd.publish(vel_msg);
 		double t1 = ros::Time::now().toSec();
-		current_angle = angular_speed * (t1-t0);
+		rotated_angle = ang_speed_sgn * angular_speed * (t1-t0);
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
@@ -57,15 +69,7 @@ void rotate (double angular_speed, double relative_angle){
 double getAngleBetweenPoses2D(geometry_msgs::Pose p1, geometry_msgs::Pose p2) {
     float dx = p2.position.x - p1.position.x;
     float dy = p2.position.y - p1.position.y;
-    return (atan2(dx, dy));
-}
-
-double rad2deg(double rad) {
-    return (rad*(180/M_PI));
-}
-
-double deg2rad(double deg) {
-    return (deg*M_PI/180);
+    return (atan2(dy, dx));
 }
 
 void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
@@ -81,8 +85,9 @@ void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
     ROS_INFO("planned heading: %lf\n", rad2deg(angle));
     ROS_INFO("pre heading    : %lf\n", rad2deg(yaw));
 
-    if (yaw > angle) angle += deg2rad(360.0);
-    rotate(1.0, angle-yaw);
+	double speed = 1.0;
+	if (yaw > angle) speed = -1.0;
+	rotate(speed, fabs(angle-yaw));
 
     toEulerianAngle(currentPose.orientation, pitch, roll, yaw);    
     ROS_INFO("post_heading   : %lf\n", rad2deg(yaw));
