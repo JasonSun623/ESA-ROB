@@ -6,6 +6,7 @@
 #include <nav_msgs/Odometry.h>
 #include <math.h>
 #include <tf/transform_datatypes.h>
+#include <angles/angles.h>
 
 ros::Publisher pubVelCmd;
 geometry_msgs::Pose currentPose;
@@ -80,13 +81,6 @@ double getDistBetweenPoses2D(geometry_msgs::Pose p1, geometry_msgs::Pose p2) {
     return (sqrt(dx*dx+dy*dy));
 }
 
-// taken from https://stackoverflow.com/questions/1878907/the-smallest-difference-between-2-angles
-double getSmallestAngle(double a, double b) {
-	double smallest_angle = a - b;
-	smallest_angle += (smallest_angle > M_PI) ? -2.0*M_PI : (smallest_angle < -M_PI) ? 2.0*M_PI : 0.0;
-	return smallest_angle;
-}
-
 void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
     double angle = getAngleBetweenPoses2D(currentPose, msg->pose);
 	double distance = getDistBetweenPoses2D(currentPose, msg->pose);
@@ -96,7 +90,7 @@ void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
     ROS_INFO("planned heading: %lf\n", rad2deg(angle));
     ROS_INFO("pre heading    : %lf\n", rad2deg(yaw));
 
-	double smallest_angle = getSmallestAngle(angle, yaw);
+	double smallest_angle = angles::shortest_angular_distance(angle, yaw);
 
 	double speed = 1.0;
 	if (smallest_angle < 0.0) speed = -1.0;
@@ -114,7 +108,7 @@ void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
 	double gYaw = tf::getYaw(msg->pose.orientation);
 	ROS_INFO("final heading  : %lf\n", rad2deg(gYaw));
 	
-	double final_angle = getSmallestAngle(gYaw, yaw);
+	double final_angle = angles::shortest_angular_distance(gYaw, yaw);
 	speed = 1.0;
 	if (final_angle < 0.0) speed = -1.0;
 	rotate(speed, fabs(final_angle));
