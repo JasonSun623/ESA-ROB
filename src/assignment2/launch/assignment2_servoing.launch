@@ -1,0 +1,7 @@
+<!--  -->
+<launch>
+  <node name="Stage" pkg="stage_ros" type="stageros" args="$(find assignment2)/world/empty.world">
+    <param name="base_watchdog_timeout" value="0" />
+  </node>
+  <node name="assignment2_servoing" pkg="assignment2" type="servoing_node" />
+</launch>
