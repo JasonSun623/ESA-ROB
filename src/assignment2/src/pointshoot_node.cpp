@@ -85,9 +85,12 @@ void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
     ROS_INFO("planned heading: %lf\n", rad2deg(angle));
     ROS_INFO("pre heading    : %lf\n", rad2deg(yaw));
 
+	double smallest_angle = angle - yaw;
+	smallest_angle += (smallest_angle > M_PI) ? -2.0*M_PI : (smallest_angle < -M_PI) ? 2.0*M_PI : 0.0;
+
 	double speed = 1.0;
-	if (yaw > angle) speed = -1.0;
-	rotate(speed, fabs(angle-yaw));
+	if (smallest_angle < 0.0) speed = -1.0;
+	rotate(speed, fabs(smallest_angle));
 
     toEulerianAngle(currentPose.orientation, pitch, roll, yaw);    
     ROS_INFO("post_heading   : %lf\n", rad2deg(yaw));
