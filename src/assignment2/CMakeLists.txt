@@ -201,7 +201,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 add_executable(pointshoot_node src/pointshoot_node.cpp)
 target_link_libraries(pointshoot_node ${catkin_LIBRARIES})
 
-add_executable(servoing_node src/servoing_node.cpp)
+add_executable(servoing_node src/servoing_node.cpp src/pid.cpp)
 target_link_libraries(servoing_node ${catkin_LIBRARIES})
 
 
