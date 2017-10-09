@@ -1,4 +1,7 @@
-// https://gist.github.com/bradley219/5373998
+/*
+ * Taken from this source:
+ * https://gist.github.com/bradley219/5373998
+ */
 
 #ifndef _PID_SOURCE_
 #define _PID_SOURCE_
