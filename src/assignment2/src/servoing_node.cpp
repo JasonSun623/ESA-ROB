@@ -21,6 +21,18 @@ double deg2rad(double deg) {
     return (deg*M_PI/180);
 }
 
+double getAngleBetweenPoses2D(geometry_msgs::Pose p1, geometry_msgs::Pose p2) {
+    float dx = p2.position.x - p1.position.x;
+    float dy = p2.position.y - p1.position.y;
+    return (atan2(dy, dx));
+}
+
+double getDistBetweenPoses2D(geometry_msgs::Pose p1, geometry_msgs::Pose p2) {
+    float dx = p2.position.x - p1.position.x;
+	float dy = p2.position.y - p1.position.y;
+    return (sqrt(dx*dx+dy*dy));
+}
+
 /*
  * Taken from the previous assignment, which took it from this source:
  * https://github.com/aniskoubaa/lab_exams/blob/master/src/shape_drawing/shape_drawing.cpp
@@ -56,43 +68,34 @@ void rotate(double dest_angle){
 /*
  * Simple move() derived from a function in the previous functions source.
  */
-void shoot(double speed, double distance) {
+void shoot(const geometry_msgs::PoseStamped::ConstPtr &msg) {
 	PID pid = PID(1, 100, -100, 1, 0.00, 0.0);
 	geometry_msgs::Twist vel_msg;
 	ros::Rate loop_rate(100);
 
-	double cur_pos = 0.0;
-	
-	double error = distance;
-
-	double t0 = ros::Time::now().toSec();
-	
-	while(fabs(error) > 0.01) {
-		error = pid.calculate(distance, cur_pos);
+	double dest = getDistBetweenPoses2D(currentPose, msg->pose);
+	double error = pid.calculate(dest, 0.0);
+	double prevError = error;
+	while(fabs(error) > 0.01 ) {
+		dest = getDistBetweenPoses2D(currentPose, msg->pose);
+		error = pid.calculate(dest, 0.0);
+		if (error > prevError) {
+			ROS_INFO("Ho! Ik ben te ver!");			
+			break;
+		}
 		ROS_INFO("loop: error: %lf", error);
-		double t1 = ros::Time::now().toSec();
-		cur_pos = error * (t1-t0);
 		vel_msg.linear.x = error;
 		pubVelCmd.publish(vel_msg);
 		ros::spinOnce();
 		loop_rate.sleep();
+		prevError = error;	
 	}
 	
 	vel_msg.linear.x = 0;
 	pubVelCmd.publish(vel_msg);
 }
 
-double getAngleBetweenPoses2D(geometry_msgs::Pose p1, geometry_msgs::Pose p2) {
-    float dx = p2.position.x - p1.position.x;
-    float dy = p2.position.y - p1.position.y;
-    return (atan2(dy, dx));
-}
 
-double getDistBetweenPoses2D(geometry_msgs::Pose p1, geometry_msgs::Pose p2) {
-    float dx = p2.position.x - p1.position.x;
-	float dy = p2.position.y - p1.position.y;
-    return (sqrt(dx*dx+dy*dy));
-}
 
 void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
     double angle = getAngleBetweenPoses2D(currentPose, msg->pose);
@@ -105,8 +108,7 @@ void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
 
 	rotate(angle);
 	
-	// always drive forward
-	shoot(1.0, distance);
+	shoot(msg);
 	
 	ros::spinOnce();
 
