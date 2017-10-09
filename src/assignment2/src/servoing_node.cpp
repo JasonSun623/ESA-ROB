@@ -8,6 +8,7 @@
 #include <tf/transform_datatypes.h>
 #include <angles/angles.h>
 #include "pid.h"
+#include <chrono>
 
 ros::Publisher pubVelCmd;
 geometry_msgs::Pose currentPose;
@@ -24,27 +25,28 @@ double deg2rad(double deg) {
  * Taken from the previous assignment, which took it from this source:
  * https://github.com/aniskoubaa/lab_exams/blob/master/src/shape_drawing/shape_drawing.cpp
  */
-void rotate(double angular_speed, double relative_angle){
-
-	PID pid = PID(0.1, 100, -100, 0.1, 0.01, 0.5);
-
-	double ang_speed_sgn = angular_speed > 0.0 ? 1.0 : -1.0;
+void rotate(double dest_angle){
+	PID pid = PID(1, 2*M_PI, 2*-M_PI, 1, 0.00, 0.0);
 
 	geometry_msgs::Twist vel_msg;
 
-	vel_msg.angular.z = angular_speed;
-
-	double t0 = ros::Time::now().toSec();
-	double rotated_angle = 0.0;
 	ros::Rate loop_rate(100);
 
-	while (rotated_angle < relative_angle) {
+	double error = pid.calculate(dest_angle, tf::getYaw(currentPose.orientation));
+	ROS_INFO("error: %lf", error);
+	
+	ROS_INFO(" yaw: %lf", tf::getYaw(currentPose.orientation));
+	ROS_INFO("dest: %lf", dest_angle);
+
+	while (fabs(error) > deg2rad(0.5)) {
+		vel_msg.angular.z = error;
 		pubVelCmd.publish(vel_msg);
-		double t1 = ros::Time::now().toSec();
-		rotated_angle = ang_speed_sgn * angular_speed * (t1-t0);
+		error = pid.calculate(dest_angle, tf::getYaw(currentPose.orientation));
+		//ROS_INFO("loop: error: %lf", error);
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
+	ROS_INFO("houdoe");
 	
 	//force the robot to stop when it reaches the desired angle
 	vel_msg.angular.z = 0;
@@ -55,21 +57,26 @@ void rotate(double angular_speed, double relative_angle){
  * Simple move() derived from a function in the previous functions source.
  */
 void shoot(double speed, double distance) {
-	speed = fabs(speed);
+	PID pid = PID(1, 100, -100, 1, 0.00, 0.0);
 	geometry_msgs::Twist vel_msg;
+	ros::Rate loop_rate(100);
+
+	double cur_pos = 0.0;
 	
-	vel_msg.linear.x = speed;
+	double error = distance;
 
 	double t0 = ros::Time::now().toSec();
-	double current_distance = 0.0;
-	ros::Rate loop_rate(100);
-	do {
-		pubVelCmd.publish(vel_msg);
+	
+	while(fabs(error) > 0.01) {
+		error = pid.calculate(distance, cur_pos);
+		ROS_INFO("loop: error: %lf", error);
 		double t1 = ros::Time::now().toSec();
-		current_distance = speed * (t1-t0);
+		cur_pos = error * (t1-t0);
+		vel_msg.linear.x = error;
+		pubVelCmd.publish(vel_msg);
 		ros::spinOnce();
 		loop_rate.sleep();
-	} while(current_distance<distance);
+	}
 	
 	vel_msg.linear.x = 0;
 	pubVelCmd.publish(vel_msg);
@@ -96,29 +103,18 @@ void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
     ROS_INFO("planned heading: %lf\n", rad2deg(angle));
     ROS_INFO("pre heading    : %lf\n", rad2deg(yaw));
 
-	double smallest_angle = angles::shortest_angular_distance(yaw, angle);
-
-	double speed = 1.0;
-	if (smallest_angle < 0.0) speed = -1.0;
-	rotate(speed, fabs(smallest_angle));
-
-	yaw = tf::getYaw(currentPose.orientation);
-	ROS_INFO("post_heading   : %lf\n", rad2deg(yaw));
+	rotate(angle);
 	
 	// always drive forward
 	shoot(1.0, distance);
 	
-	// update again
 	ros::spinOnce();
-	yaw = tf::getYaw(currentPose.orientation);	
 
 	double gYaw = tf::getYaw(msg->pose.orientation);
 	ROS_INFO("final heading  : %lf\n", rad2deg(gYaw));
 	
-	double final_angle = angles::shortest_angular_distance(yaw, gYaw);
-	speed = 1.0;
-	if (final_angle < 0.0) speed = -1.0;
-	rotate(speed, fabs(final_angle));
+	ros::spinOnce();
+	rotate(gYaw);
 }
 
 void cbOdom(const nav_msgs::Odometry::ConstPtr &msg) {
