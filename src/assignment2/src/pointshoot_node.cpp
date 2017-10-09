@@ -20,7 +20,7 @@ double deg2rad(double deg) {
 
 /*
  * Taken from the previous assignment, which took it from this source:
- * 
+ * https://github.com/aniskoubaa/lab_exams/blob/master/src/shape_drawing/shape_drawing.cpp
  */
 void rotate(double angular_speed, double relative_angle){	
 
@@ -47,6 +47,9 @@ void rotate(double angular_speed, double relative_angle){
 	pubVelCmd.publish(vel_msg);
 }
 
+/*
+ * Simple move() derived from a function in the previous functions source.
+ */
 void shoot(double speed, double distance) {
 	speed = fabs(speed);
 	geometry_msgs::Twist vel_msg;
@@ -105,6 +108,7 @@ void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
 	yaw = tf::getYaw(currentPose.orientation);
 	ROS_INFO("post_heading   : %lf\n", rad2deg(yaw));
 	
+	// always drive forward
 	shoot(1.0, distance);
 	
 	// update again
