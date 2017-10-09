@@ -1,12 +1,7 @@
 ESA-ROS Assignment 2
 --------------------
 
-Assignment 2 with moves etc.
-
-Dingen die handig zijn om te doen:
-* Comment in de code waar de code vandaan komt
-* Meer testen
-* Uitleg _waarom_ we denken wat er gebeurt
+Minh-Triet Diep, Lars Jaeqx
 
 # Code explanation
 
@@ -19,7 +14,11 @@ With that, we managed to get it to turn to the goal with the smallest rotation n
 
 This concludes "Point and shoot".
 
-# Running instructions
+## Servoing
+
+We worked from the `Point and Shoot`.
+
+# Running instructions  
 
 As with the previous assignment, the steps are similar to get the program started:
 
@@ -31,7 +30,23 @@ roslaunch assignment2 assigment2_point.launch
 rostopic pub -1 /goal geometry_msgs/PoseStamped '{header: {stamp: now, frame_id: "map"}, pose: {position: {x: 1.0, y: 1.0, z: 0.0}, orientation: {x: 0.0, y: 0.0, z: 1.0, w: 0.0}}}'
 ```
 
-# Tests and Observations
+# Tests and Observations  
+
+## Point and shoot  
+[Results on YouTube: https://www.youtube.com/watch?v=CsxywmbSKs4](https://www.youtube.com/watch?v=CsxywmbSKs4)
+
+As you can see, the point-and-shoot method works reasonably well. Also visible is that once you need to go to the same coordinate you just went to, the robot does a small correction. This is because point-and-shoot has an inherent inaccuracy. We needed to use this [rotation converter](http://www.andre-gaschler.com/rotationconverter/) to figure out the rotation in quaternions, as is visible.
+
+## Servoing  
+
+Things!
 
 # Graph 
 
+## Point and shoot
+
+![Graph](./assignment2-pointandshoot-rosgraph.png)
+
+## Servoing
+
+Things!
