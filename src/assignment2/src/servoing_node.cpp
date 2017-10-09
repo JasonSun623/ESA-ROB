@@ -96,7 +96,7 @@ void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
     ROS_INFO("planned heading: %lf\n", rad2deg(angle));
     ROS_INFO("pre heading    : %lf\n", rad2deg(yaw));
 
-	double smallest_angle = angles::shortest_angular_distance(angle, yaw);
+	double smallest_angle = angles::shortest_angular_distance(yaw, angle);
 
 	double speed = 1.0;
 	if (smallest_angle < 0.0) speed = -1.0;
@@ -115,7 +115,7 @@ void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
 	double gYaw = tf::getYaw(msg->pose.orientation);
 	ROS_INFO("final heading  : %lf\n", rad2deg(gYaw));
 	
-	double final_angle = angles::shortest_angular_distance(gYaw, yaw);
+	double final_angle = angles::shortest_angular_distance(yaw, gYaw);
 	speed = 1.0;
 	if (final_angle < 0.0) speed = -1.0;
 	rotate(speed, fabs(final_angle));
