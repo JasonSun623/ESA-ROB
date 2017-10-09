@@ -20,10 +20,16 @@ With that, we managed to get it to turn to the goal with the smallest rotation n
 This concludes "Point and shoot".
 
 # Running instructions
+
+As with the previous assignment, the steps are similar to get the program started:
+
 ```sh
+cd ~/catkin_ws
+catkin_make
+source devel/setup.bash
+roslaunch assignment2 assigment2_point.launch
 rostopic pub -1 /goal geometry_msgs/PoseStamped '{header: {stamp: now, frame_id: "map"}, pose: {position: {x: 1.0, y: 1.0, z: 0.0}, orientation: {x: 0.0, y: 0.0, z: 1.0, w: 0.0}}}'
 ```
-
 
 # Tests and Observations
 
