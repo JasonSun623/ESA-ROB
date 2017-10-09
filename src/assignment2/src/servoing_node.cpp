@@ -7,6 +7,7 @@
 #include <math.h>
 #include <tf/transform_datatypes.h>
 #include <angles/angles.h>
+#include "pid.h"
 
 ros::Publisher pubVelCmd;
 geometry_msgs::Pose currentPose;
@@ -23,7 +24,9 @@ double deg2rad(double deg) {
  * Taken from the previous assignment, which took it from this source:
  * https://github.com/aniskoubaa/lab_exams/blob/master/src/shape_drawing/shape_drawing.cpp
  */
-void rotate(double angular_speed, double relative_angle){	
+void rotate(double angular_speed, double relative_angle){
+
+	PID pid = PID(0.1, 100, -100, 0.1, 0.01, 0.5);
 
 	double ang_speed_sgn = angular_speed > 0.0 ? 1.0 : -1.0;
 
