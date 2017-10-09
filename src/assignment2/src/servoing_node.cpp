@@ -38,7 +38,7 @@ double getDistBetweenPoses2D(geometry_msgs::Pose p1, geometry_msgs::Pose p2) {
  * https://github.com/aniskoubaa/lab_exams/blob/master/src/shape_drawing/shape_drawing.cpp
  */
 void rotate(double dest_angle){
-	PID pid = PID(1, 2*M_PI, 2*-M_PI, 1, 0.00, 0.0);
+	PID pid = PID(1, M_PI, -M_PI, 1, 0.00, 0.0);
 
 	geometry_msgs::Twist vel_msg;
 
