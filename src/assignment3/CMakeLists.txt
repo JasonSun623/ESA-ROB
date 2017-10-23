@@ -16,14 +16,10 @@ generate_messages(
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES pid
+  LIBRARIES pid_assignment_3
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS})
-
-add_executable(follow_carrot_node src/follow_carrot_node.cpp)
-add_library(pid src/pid.cpp)
-target_link_libraries(follow_carrot_node pid ${catkin_LIBRARIES})
 
 add_executable(rectangle_planner_node src/rectangle_planner_node.cpp)
 target_link_libraries(rectangle_planner_node ${catkin_LIBRARIES})
@@ -31,3 +27,6 @@ target_link_libraries(rectangle_planner_node ${catkin_LIBRARIES})
 add_executable(triangle_planner_node src/triangle_planner_node.cpp)
 target_link_libraries(triangle_planner_node ${catkin_LIBRARIES})
 
+add_executable(follow_carrot_node src/follow_carrot_node.cpp)
+add_library(pid_assignment_3 src/pid.cpp)
+target_link_libraries(follow_carrot_node pid_assignment_3 ${catkin_LIBRARIES})
