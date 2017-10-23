@@ -45,11 +45,11 @@ geometry_msgs::PoseStamped makePoseStamped(double pX, double pY, double pZ, doub
 void makePath() {
 	geometry_msgs::PoseStamped pose = makePoseStamped(1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 	path.push_back(pose);
-	geometry_msgs::PoseStamped pose = makePoseStamped(4.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	pose = makePoseStamped(4.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 	path.push_back(pose);
-	geometry_msgs::PoseStamped pose = makePoseStamped(-4.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	pose = makePoseStamped(-4.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 	path.push_back(pose);
-	geometry_msgs::PoseStamped pose = makePoseStamped(-8.0, -9.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	pose = makePoseStamped(-8.0, -9.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 	path.push_back(pose);
 
 	nav_msgs::Path path_msg;
