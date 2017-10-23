@@ -91,7 +91,7 @@ void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
     double a = - yaw + atan2(dy, dx);
     double b = - yaw - a;
 
-    ROS_INFO("planned heading: %lf\n", rad2deg(angle));
+    //ROS_INFO("planned heading: %lf\n", rad2deg(angle));
     ROS_INFO("pre heading    : %lf\n", rad2deg(yaw));
 
     double v = 1.0 * distance;
