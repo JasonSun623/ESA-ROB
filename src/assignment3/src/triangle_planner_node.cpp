@@ -1,6 +1,8 @@
 #include "ros/ros.h"
 #include <nav_msgs/Path.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <math.h>
+#include <vector>
 
 ros::Publisher path_publisher;
 
