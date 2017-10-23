@@ -91,7 +91,7 @@ void cbGoal(const geometry_msgs::PoseStamped::ConstPtr &msg) {
     double a = - yaw + atan2(dy, dx);
     double b = - yaw - a;
 
-    ROS_INFO("planned heading: %lf\n", rad2deg(angle));
+    //ROS_INFO("planned heading: %lf\n", rad2deg(angle));
     ROS_INFO("pre heading    : %lf\n", rad2deg(yaw));
 
     double v = 1.0 * distance;
@@ -138,7 +138,7 @@ void cbOdom(const nav_msgs::Odometry::ConstPtr &msg) {
 }
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "servoing_node");
+	ros::init(argc, argv, "follow_carrot_node");
 	ros::NodeHandle n;
     ros::Subscriber subGoal = n.subscribe("/goal", 100, cbGoal);
     ros::Subscriber subOdom = n.subscribe("/odom", 100, cbOdom);
