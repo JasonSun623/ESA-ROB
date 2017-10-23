@@ -10,8 +10,12 @@ ros::Publisher path_publisher;
 std::vector<geometry_msgs::PoseStamped> path;
 
 /** converts an angle from degrees to radians **/
-double degrees2radians(double angle_in_degrees) {
-	return angle_in_degrees * M_PI /180.0;
+double rad2deg(double rad) {
+    return (rad*(180/M_PI));
+}
+
+double deg2rad(double deg) {
+    return (deg*M_PI/180);
 }
 
 // Jammer dit ROS...
@@ -19,22 +23,33 @@ geometry_msgs::PoseStamped makePoseStamped(double pX, double pY, double pZ, doub
 	geometry_msgs::Point p;
 	geometry_msgs::Quaternion q;
 	geometry_msgs::Pose pos;
-	geometry_msgs::PoseStamped posStamped;
+	geometry_msgs::PoseStamped ps;
+
 	p.x = pX;
 	p.y = pY;
 	p.z = pZ;
+
 	q.x = qX;
 	q.y = qY;
 	q.z = qZ;
 	q.w = qW;
+
 	pos.position = p;
 	pos.orientation = q;
-	posStamped.pose = pos;
-	return posStamped;
+
+	ps.pose = pos;
+
+	return ps;
 }
 
 void makePath() {
 	geometry_msgs::PoseStamped pose = makePoseStamped(1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	path.push_back(pose);
+	geometry_msgs::PoseStamped pose = makePoseStamped(4.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	path.push_back(pose);
+	geometry_msgs::PoseStamped pose = makePoseStamped(-4.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	path.push_back(pose);
+	geometry_msgs::PoseStamped pose = makePoseStamped(-8.0, -9.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 	path.push_back(pose);
 
 	nav_msgs::Path path_msg;
@@ -48,6 +63,8 @@ int main(int argc, char **argv) {
 	ros::NodeHandle n;
 	path_publisher = n.advertise<nav_msgs::Path>("plan", 1000);
 	ros::Rate loop_rate(100);
+
+	ros::Duration(10.50).sleep();
 
 	makePath();
 	
