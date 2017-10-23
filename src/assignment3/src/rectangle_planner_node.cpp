@@ -16,6 +16,4 @@ int main(int argc, char **argv) {
 	ros::Rate loop_rate(100);
 	
 	ros::spin();
-
-	return 0;
 }

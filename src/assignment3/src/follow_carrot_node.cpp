@@ -138,7 +138,7 @@ void cbOdom(const nav_msgs::Odometry::ConstPtr &msg) {
 }
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "servoing_node");
+	ros::init(argc, argv, "follow_carrot_node");
 	ros::NodeHandle n;
     ros::Subscriber subGoal = n.subscribe("/goal", 100, cbGoal);
     ros::Subscriber subOdom = n.subscribe("/odom", 100, cbOdom);
