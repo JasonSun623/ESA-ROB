@@ -5,5 +5,5 @@
   </node>
   <node pkg="tf" type="static_transform_publisher" name="localizer" args="0 0 0 0 0 0 map odom 100" />
   <node name="assignment3_local" pkg="assignment3" type="follow_carrot_node" />
-  <node name="assignment3_global" pkg="assignment3" type="rectangle_planner_node" />
+  <node name="assignment3_global" pkg="assignment3" type="triangle_planner_node" />
 </launch>
