@@ -47,15 +47,15 @@ void updatePose(const tf::StampedTransform &transform) {
 	g_currentPose.position.z = transform.getOrigin().z();
 	tf::quaternionTFToMsg(transform.getRotation(), g_currentPose.orientation);
 
-	ROS_INFO("pos: x: %lf, y: %lf, z: %lf", 
-		g_currentPose.position.x, 
-		g_currentPose.position.y, 
-		g_currentPose.position.z);		
-	ROS_INFO("rot: x: %lf, y: %lf, z: %lf, w: %lf", 
-		g_currentPose.orientation.x, 
-		g_currentPose.orientation.y, 
-		g_currentPose.orientation.z, 
-		g_currentPose.orientation.w);
+	// ROS_INFO("pos: x: %lf, y: %lf, z: %lf", 
+	// 	g_currentPose.position.x, 
+	// 	g_currentPose.position.y, 
+	// 	g_currentPose.position.z);		
+	// ROS_INFO("rot: x: %lf, y: %lf, z: %lf, w: %lf", 
+	// 	g_currentPose.orientation.x, 
+	// 	g_currentPose.orientation.y, 
+	// 	g_currentPose.orientation.z, 
+	// 	g_currentPose.orientation.w);
 }
 
 geometry_msgs::Pose make2DPose(double x, double y) {
@@ -78,30 +78,30 @@ std::vector<geometry_msgs::Pose> getCircleIntersections(geometry_msgs::Pose wayp
 	double wy2 = nextWaypoint.position.y;
 
 	double dx = wx2 - wx1;
-	ROS_INFO("dx: %.3lf\n", dx);
+	//ROS_INFO("dx: %.3lf\n", dx);
 
 	double dy = wy2 - wy1;
-	ROS_INFO("dy: %.3lf\n", dy);
+	//ROS_INFO("dy: %.3lf\n", dy);
 	
 	double a_l = dx == 0.0 ? 0.0 : dy/dx;
-	ROS_INFO("a_l: %.3lf\n", a_l);
+	//ROS_INFO("a_l: %.3lf\n", a_l);
 	
 	double b_l = wy1 - a_l * wx1;
-	ROS_INFO("b_l: %.3lf\n", b_l);
+	//ROS_INFO("b_l: %.3lf\n", b_l);
 	
-	ROS_INFO("y = %.3lfx+%.3lf", a_l, b_l);
+	//ROS_INFO("y = %.3lfx+%.3lf", a_l, b_l);
 	
 	double a = a_l*a_l + 1;
-	ROS_INFO("a: %.3lf\n", a);
+	//ROS_INFO("a: %.3lf\n", a);
 	
 	double b = -2*rpx + 2*a_l*(b_l-rpy);
-	ROS_INFO("b: %.3lf\n", b);
+	//ROS_INFO("b: %.3lf\n", b);
 
 	double c = rpx*rpx + (b_l - rpy)*(b_l - rpy) - distance*distance;
-	ROS_INFO("c: %.3lf\n", c);
+	//ROS_INFO("c: %.3lf\n", c);
 
 	double D = (b*b - 4*a*c);
-	ROS_INFO("D: %.3lf\n", D);
+	//ROS_INFO("D: %.3lf\n", D);
 
 	if (D < 0.0) {
 		return std::vector<geometry_msgs::Pose>();
@@ -185,6 +185,8 @@ void moveToNextPosition() {
 	geometry_msgs::Twist vel_msg;
 	vel_msg.linear.x = fmin(getDistBetweenPoses2D(g_currentPose, closestToGoal), 5.0);
 	vel_msg.angular.z = fmin(getAngleBetweenPoses2D(g_currentPose, closestToGoal), 3.14);
+	ROS_INFO("spd: %lf ang: %lf", vel_msg.linear.x, vel_msg.angular.z);
+	g_velPublisher.publish(vel_msg);	
 }
 
 int main(int argc, char **argv) {
@@ -200,18 +202,19 @@ int main(int argc, char **argv) {
 		tf::StampedTransform transform;
 		try {
 			listener.lookupTransform("/odom", "/base_link", ros::Time(0), transform);
-
+			updatePose(transform);
+			if (g_goals.size() > 0) {
+				moveToNextPosition();			
+			}
 		}
 		catch (tf::TransformException ex){
 		  ROS_ERROR("%s",ex.what());
 		  ros::Duration(1.0).sleep();
 		}
-		updatePose(transform);
-		if (g_goals.size() > 0) {
-			moveToNextPosition();			
-		}
+		ros::spinOnce();
 		rate.sleep();
 	}
+	ROS_INFO("houdoe");
 	//ros::spin();
 	return 0;
 }
