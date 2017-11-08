@@ -73,6 +73,23 @@ geometry_msgs::Pose findIntersect(double distance) {
 
 }
 
+double getCircleIntersect(geometry_msgs::Pose waypoint, geometry_msgs::Pose robot) {
+	double dx = waypoint.position.x - robot.position.x;
+	double dy = waypoint.position.y - robot.position.y;
+	double dr = sqrt(pow(dx, 2) + pow(dy, 2));
+	double D = (robot.position.x * waypoint.position.y) - (waypoint.position.x * robot.position.y);
+
+	double sgn = dy < 0 ? -1 : 1;
+
+	double wortel = sqrt((pow(lookAhead, 2) * pow(dr, 2)) - pow(D, 2));
+
+	double x1 = D * dy + (sgn * dy) * dx * wortel / pow(dr, 2); 
+	double y1 = -D * dx + fabs(dy) * wortel / pow(dr, 2); 
+
+	double x2 = D * dy - (sgn * dy) * dx * wortel / pow(dr, 2); 
+	double y2 = -D * dx - fabs(dy) * wortel / pow(dr, 2); 
+}
+
 void moveToNextPosition() {
 	auto nextIntersection = findIntersect(lookAhead);
 	
