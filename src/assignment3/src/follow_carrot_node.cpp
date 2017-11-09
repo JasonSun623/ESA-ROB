@@ -20,6 +20,7 @@ const double lookAhead = 2.0;
 ros::Publisher g_velPublisher;
 geometry_msgs::Pose g_currentPose;
 std::vector<geometry_msgs::PoseStamped, std::allocator<geometry_msgs::PoseStamped>> g_goals;
+int g_goalCount = 0;
 
 double rad2deg(double rad) {
     return (rad*(180/M_PI));
@@ -125,7 +126,7 @@ std::vector<geometry_msgs::Pose> getCircleIntersections(geometry_msgs::Pose wayp
 		make2DPose(x2, y2)
 	};
 	
-	ROS_INFO("(%.3lf, %.3lf) and (%.3lf, %.3lf)\n", x1, y1, x2, y2);
+	//ROS_INFO("(%.3lf, %.3lf) and (%.3lf, %.3lf)\n", x1, y1, x2, y2);
 
 	return points;
 }
@@ -134,7 +135,7 @@ void cbPath(const nav_msgs::Path::ConstPtr &msg) {
 	g_goals = msg->poses;
 	ROS_INFO("Path sz: %d", (int)g_goals.size());
 	for (auto goal : g_goals) {
-		ROS_INFO("x: %lf, y: %lf", goal.pose.position.x, goal.pose.position.y);		
+		//ROS_INFO("x: %lf, y: %lf", goal.pose.position.x, goal.pose.position.y);		
 		geometry_msgs::PoseStamped::ConstPtr goalPtr(new geometry_msgs::PoseStamped(goal));
 	}
 	//getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, lookAhead);
@@ -155,14 +156,21 @@ geometry_msgs::Pose getClosest(geometry_msgs::Pose goal, std::vector<geometry_ms
 }
 
 void moveToNextPosition() {
-	auto intersections = getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, lookAhead);
+	auto intersectionsToNextPoint = getCircleIntersections(g_goals[g_goalCount+1].pose, g_goals[g_goalCount+2].pose, g_currentPose, lookAhead);
+
+	if (intersectionsToNextPoint.size() > 0) {
+		g_goalCount++;
+	}
+
+	auto intersections = getCircleIntersections(g_goals[g_goalCount].pose, g_goals[g_goalCount+1].pose, g_currentPose, lookAhead);
+
 	if (intersections.size() == 0) {
 		// recalculate with bigger radius?
-		double wx1 = g_goals[0].pose.position.x;
-		double wy1 = g_goals[0].pose.position.y;
+		double wx1 = g_goals[g_goalCount].pose.position.x;
+		double wy1 = g_goals[g_goalCount].pose.position.y;
 	
-		double wx2 = g_goals[1].pose.position.x;
-		double wy2 = g_goals[1].pose.position.y;
+		double wx2 = g_goals[g_goalCount+1].pose.position.x;
+		double wy2 = g_goals[g_goalCount+1].pose.position.y;
 	
 		double dx = wx2 - wx1;
 		double dy = wy2 - wy1;
@@ -177,15 +185,19 @@ void moveToNextPosition() {
 		double y = a2*x+b2;
 		// point
 		double newDist = getDistBetweenPoses2D(make2DPose(x, y), g_currentPose);
-		intersections = getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, newDist);
+		intersections = getCircleIntersections(g_goals[g_goalCount].pose, g_goals[g_goalCount+1].pose, g_currentPose, newDist);
 	}
 	
-	geometry_msgs::Pose closestToGoal = getClosest(g_currentPose, intersections);
+	geometry_msgs::Pose closestToGoal = getClosest(g_goals[g_goalCount].pose, intersections);
+	ROS_INFO("closest: x: %lf, y: %lf", 
+		closestToGoal.position.x, 
+	 	closestToGoal.position.y);
+
 	// robot move to closestToGoal
 	geometry_msgs::Twist vel_msg;
 	vel_msg.linear.x = fmin(getDistBetweenPoses2D(g_currentPose, closestToGoal), 5.0);
 	vel_msg.angular.z = fmin(getAngleBetweenPoses2D(g_currentPose, closestToGoal), 3.14);
-	ROS_INFO("spd: %lf ang: %lf", vel_msg.linear.x, vel_msg.angular.z);
+	//ROS_INFO("spd: %lf ang: %lf", vel_msg.linear.x, vel_msg.angular.z);
 	g_velPublisher.publish(vel_msg);	
 }
 
