@@ -17,7 +17,7 @@
 #include <tf/transform_listener.h>
 
 const double lookAhead = 1.0;
-const double tolerance = 0.01;
+const double tolerance = 0.1;
 ros::Publisher g_velPublisher;
 geometry_msgs::Pose g_currentPose;
 std::vector<geometry_msgs::PoseStamped, std::allocator<geometry_msgs::PoseStamped>> g_goals;
@@ -187,19 +187,9 @@ geometry_msgs::Pose getClosest(geometry_msgs::Pose goal, std::vector<geometry_ms
  * Taken from the previous assignment, which took it from this source:
  * https://github.com/aniskoubaa/lab_exams/blob/master/src/shape_drawing/shape_drawing.cpp
  */
-double getAngular(double dest_angle){
-	PID pid = PID(1, M_PI, -M_PI, 1, 0.00, 0.0);
-
-	double error;	
-	if (dest_angle < 0) {
-		dest_angle += 2.0*M_PI;
-		error = pid.calculate(dest_angle, tf::getYaw(g_currentPose.orientation)+2.0*M_PI);
-	}
-	else {
-		error = pid.calculate(dest_angle, tf::getYaw(g_currentPose.orientation));
-	}
-
-	//double error = tf::getYaw(g_currentPose.orientation) - dest_angle;
+double getAngular(double dest_angle, double curr_angle){
+	PID pid = PID(1, 2.0*M_PI, 2.0*-M_PI, 1, 0.00, 0.0);
+	double error = pid.calculate(dest_angle, curr_angle);
 	return error;
 }
 
@@ -214,11 +204,6 @@ void moveToNextPosition() {
 			ROS_INFO("Removed g_goals[0], goals left: %d", (int)g_goals.size());
 			ROS_INFO("Intersections: %d", (int)intersectionsToNextPoint.size());
 		}
-	}
-	if (g_goals.size() == 2 && getDistBetweenPoses2D(g_currentPose, g_goals[1].pose) < tolerance) {
-		g_goals.clear();
-		ROS_INFO("Done!");
-		return;
 	}
 
 	auto intersections = getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, lookAhead);
@@ -245,7 +230,7 @@ void moveToNextPosition() {
 		double x = (b1-b2)/(a2-a1);
 		double y = a2*x+b2;
 		// point
-		double newDist = getDistBetweenPoses2D(make2DPose(x, y), g_currentPose);
+		double newDist = 1.1*getDistBetweenPoses2D(make2DPose(x, y), g_currentPose);
 		intersections = getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, newDist);
 	}
 	
@@ -253,14 +238,29 @@ void moveToNextPosition() {
 
 	// robot move to closestToGoal
 	geometry_msgs::Twist vel_msg;
-	vel_msg.linear.x = fmin(getDistBetweenPoses2D(g_currentPose, closestToGoal), 1.0);
+	vel_msg.linear.x = fmin(getDistBetweenPoses2D(g_currentPose, g_goals[1].pose), 1.0);
 	double deltaAngle = getAngleBetweenPoses2D(g_currentPose, closestToGoal);	
-	double turnSpeed = 2.0*getAngular(deltaAngle);
+	double currAngle = tf::getYaw(g_currentPose.orientation);
+	if (deltaAngle < 0) {
+		deltaAngle = deltaAngle+2*M_PI;
+	}
+	if (currAngle < 0) {
+		currAngle = currAngle+2*M_PI;
+	}
+	double turnSpeed = 2.0*getAngular(deltaAngle, currAngle);
+
 	vel_msg.angular.z = turnSpeed;
 
-	ROS_INFO("Goal: %lf, %lf", closestToGoal.position.x,  closestToGoal.position.y);
-	ROS_INFO("dA: %lf, w: %lf", deltaAngle, turnSpeed);
+	//ROS_INFO("Goal: %lf, %lf", closestToGoal.position.x,  closestToGoal.position.y);
+	//ROS_INFO("dA: %lf, w: %lf", deltaAngle, turnSpeed);
 
+	if (g_goals.size() == 2 && getDistBetweenPoses2D(g_currentPose, g_goals[1].pose) < tolerance) {
+		g_goals.clear();
+		ROS_INFO("Done!");
+		geometry_msgs::Twist vel_msg_stop;
+		g_velPublisher.publish(vel_msg_stop);
+		return;
+	}
 	g_velPublisher.publish(vel_msg);	
 }
 
