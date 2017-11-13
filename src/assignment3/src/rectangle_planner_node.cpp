@@ -3,7 +3,6 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Quaternion.h>
 #include <geometry_msgs/Point.h>
-#include <math.h>
 #include <vector>
 
 ros::Publisher path_publisher;
