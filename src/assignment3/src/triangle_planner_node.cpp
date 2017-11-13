@@ -9,15 +9,6 @@
 ros::Publisher path_publisher;
 std::vector<geometry_msgs::PoseStamped> path;
 
-/** converts an angle from degrees to radians **/
-double rad2deg(double rad) {
-    return (rad*(180/M_PI));
-}
-
-double deg2rad(double deg) {
-    return (deg*M_PI/180);
-}
-
 // Jammer dit ROS...
 geometry_msgs::PoseStamped makePoseStamped(double pX, double pY, double pZ, double qX, double qY, double qZ, double qW) {
 	geometry_msgs::Point p;
@@ -64,9 +55,12 @@ int main(int argc, char **argv) {
 	path_publisher = n.advertise<nav_msgs::Path>("plan", 1000);
 	ros::Rate loop_rate(100);
 
-	ros::Duration(10.50).sleep();
-
+	ROS_INFO("zzz");
+	ros::Duration(2.00).sleep();
+	ROS_INFO("!zzz");
+	
 	makePath();
+	ROS_INFO("path available");
 	
 	ros::spin();
 
