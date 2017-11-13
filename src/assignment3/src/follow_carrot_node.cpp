@@ -145,7 +145,7 @@ std::vector<geometry_msgs::Pose> getCircleIntersectionsByX(geometry_msgs::Pose w
 std::vector<geometry_msgs::Pose> getCircleIntersections(geometry_msgs::Pose waypoint, geometry_msgs::Pose nextWaypoint, geometry_msgs::Pose robot, double distance) {
 	std::vector<geometry_msgs::Pose> intersections;
 
-	ROS_INFO("Path x1: %f, x2: %f", waypoint.position.x, nextWaypoint.position.x);
+	//ROS_INFO("Path x1: %f, x2: %f", waypoint.position.x, nextWaypoint.position.x);
 
 	double diff = waypoint.position.x - nextWaypoint.position.x;
 	if(fabs(diff) < 0.01) {
@@ -180,18 +180,34 @@ geometry_msgs::Pose getClosest(geometry_msgs::Pose goal, std::vector<geometry_ms
 	return closestPose;
 }
 
+/*
+ * Taken from the previous assignment, which took it from this source:
+ * https://github.com/aniskoubaa/lab_exams/blob/master/src/shape_drawing/shape_drawing.cpp
+ */
+double getAngular(double dest_angle){
+	PID pid = PID(1, M_PI, -M_PI, 1, 0.00, 0.0);
+
+	geometry_msgs::Twist vel_msg;
+
+	ros::Rate loop_rate(100);
+
+	return pid.calculate(dest_angle, tf::getYaw(g_currentPose.orientation));
+}
+
 void moveToNextPosition() {
 	auto intersectionsToNextPoint = getCircleIntersections(g_goals[1].pose, g_goals[2].pose, g_currentPose, lookAhead);
 
-	ROS_INFO("inttopoint: %d", (int)intersectionsToNextPoint.size());
+	//ROS_INFO("inttopoint: %d", (int)intersectionsToNextPoint.size());
 
 	if(intersectionsToNextPoint.size() > 0) {
-		g_goals.erase(g_goals.begin() + 1);
+		if (g_goals.size() > 1) {
+			g_goals.erase(g_goals.begin());
+			ROS_INFO("Removed g_goals[0], goals left: %d", g_goals.size());
+			ROS_INFO("Intersections: %d", intersectionsToNextPoint.size());
+		}
 	}
 
 	auto intersections = getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, lookAhead);
-
-	ROS_INFO("int: %d", (int)intersections.size());
 
 	if (intersections.size() == 0) {
 		// recalculate with bigger radius?
@@ -217,14 +233,14 @@ void moveToNextPosition() {
 		intersections = getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, newDist);
 	}
 	
-	geometry_msgs::Pose closestToGoal = getClosest(g_goals[0].pose, intersections);
+	geometry_msgs::Pose closestToGoal = getClosest(g_goals[1].pose, intersections);
 	
 
 	// robot move to closestToGoal
 	geometry_msgs::Twist vel_msg;
-	vel_msg.linear.x = fmin(getDistBetweenPoses2D(g_currentPose, closestToGoal), 5.0);
-	vel_msg.angular.z = fmin(getAngleBetweenPoses2D(g_currentPose, closestToGoal), 3.14);
-	ROS_INFO("spd: %lf ang: %lf", vel_msg.linear.x, vel_msg.angular.z);
+	vel_msg.linear.x = fmin(getDistBetweenPoses2D(g_currentPose, closestToGoal), 0.5);
+	vel_msg.angular.z = getAngular(getAngleBetweenPoses2D(g_currentPose, closestToGoal));//fmin(getAngleBetweenPoses2D(g_currentPose, closestToGoal), 3.14);
+
 	g_velPublisher.publish(vel_msg);	
 }
 

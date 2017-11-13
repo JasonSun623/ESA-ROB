@@ -6,7 +6,7 @@
     <!--<param name="base_watchdog_timeout" value="0" />-->
   </node>
   <node pkg="tf" type="static_transform_publisher" name="localizer" args="0 0 0 0 0 0 map odom 100" />
-  <node name="assignment3_global" pkg="assignment3" type="rectangle_planner_node" />
-  <node name="assignment3_local" pkg="assignment3" type="follow_carrot_node" />
+  <node name="assignment3_global" pkg="assignment3" type="rectangle_planner_node" output="screen"/>
+  <node name="assignment3_local" pkg="assignment3" type="follow_carrot_node" output="screen"/>
 
 </launch>
