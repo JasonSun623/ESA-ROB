@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 	path_publisher = n.advertise<nav_msgs::Path>("plan", 1000);
 	ros::Rate loop_rate(100);
 
-	ros::Duration(10.50).sleep();
+	ros::Duration(2.0).sleep();
 
 	makePath();
 	

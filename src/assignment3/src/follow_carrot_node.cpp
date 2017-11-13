@@ -17,7 +17,7 @@
 #include <tf/transform_listener.h>
 
 const double lookAhead = 1.0;
-const double tolerance = 0.1;
+const double tolerance = 0.01;
 ros::Publisher g_velPublisher;
 geometry_msgs::Pose g_currentPose;
 std::vector<geometry_msgs::PoseStamped, std::allocator<geometry_msgs::PoseStamped>> g_goals;
@@ -236,9 +236,12 @@ void moveToNextPosition() {
 	
 	geometry_msgs::Pose closestToGoal = getClosest(g_goals[1].pose, intersections);
 
+	double distToNextGoal = getDistBetweenPoses2D(g_currentPose, g_goals[1].pose);
+	ROS_INFO("Dist: %lf", distToNextGoal);
+
 	// robot move to closestToGoal
 	geometry_msgs::Twist vel_msg;
-	vel_msg.linear.x = fmin(getDistBetweenPoses2D(g_currentPose, g_goals[1].pose), 1.0);
+	vel_msg.linear.x = fmin(distToNextGoal, 1.0);
 	double deltaAngle = getAngleBetweenPoses2D(g_currentPose, closestToGoal);	
 	double currAngle = tf::getYaw(g_currentPose.orientation);
 	if (deltaAngle < 0) {
@@ -247,14 +250,14 @@ void moveToNextPosition() {
 	if (currAngle < 0) {
 		currAngle = currAngle+2*M_PI;
 	}
-	double turnSpeed = 2.0*getAngular(deltaAngle, currAngle);
+	double turnSpeed = 4.0*getAngular(deltaAngle, currAngle);
 
 	vel_msg.angular.z = turnSpeed;
 
 	//ROS_INFO("Goal: %lf, %lf", closestToGoal.position.x,  closestToGoal.position.y);
 	//ROS_INFO("dA: %lf, w: %lf", deltaAngle, turnSpeed);
 
-	if (g_goals.size() == 2 && getDistBetweenPoses2D(g_currentPose, g_goals[1].pose) < tolerance) {
+	if (g_goals.size() < 2 && distToNextGoal < tolerance) {
 		g_goals.clear();
 		ROS_INFO("Done!");
 		geometry_msgs::Twist vel_msg_stop;
