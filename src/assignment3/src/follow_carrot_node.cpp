@@ -31,14 +31,18 @@ double deg2rad(double deg) {
 }
 
 double getAngleBetweenPoses2D(geometry_msgs::Pose p1, geometry_msgs::Pose p2) {
-    float dx = p2.position.x - p1.position.x;
-    float dy = p2.position.y - p1.position.y;
-    return (atan2(dy, dx));
+    double dx = p2.position.x - p1.position.x;
+    double dy = p2.position.y - p1.position.y;
+	double angle = atan2(dy, dx);	
+	if (angle > M_PI) {
+		angle -= M_PI;
+	}
+    return (angle);
 }
 
 double getDistBetweenPoses2D(geometry_msgs::Pose p1, geometry_msgs::Pose p2) {
-    float dx = p2.position.x - p1.position.x;
-	float dy = p2.position.y - p1.position.y;
+    double dx = p2.position.x - p1.position.x;
+	double dy = p2.position.y - p1.position.y;
     return (sqrt(dx*dx+dy*dy));
 }
 
