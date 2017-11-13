@@ -47,16 +47,6 @@ void updatePose(const tf::StampedTransform &transform) {
 	g_currentPose.position.y = transform.getOrigin().y();
 	g_currentPose.position.z = transform.getOrigin().z();
 	tf::quaternionTFToMsg(transform.getRotation(), g_currentPose.orientation);
-
-	// ROS_INFO("pos: x: %lf, y: %lf, z: %lf", 
-	// 	g_currentPose.position.x, 
-	// 	g_currentPose.position.y, 
-	// 	g_currentPose.position.z);		
-	// ROS_INFO("rot: x: %lf, y: %lf, z: %lf, w: %lf", 
-	// 	g_currentPose.orientation.x, 
-	// 	g_currentPose.orientation.y, 
-	// 	g_currentPose.orientation.z, 
-	// 	g_currentPose.orientation.w);
 }
 
 geometry_msgs::Pose make2DPose(double x, double y) {
@@ -67,7 +57,46 @@ geometry_msgs::Pose make2DPose(double x, double y) {
 	return p;
 }
 
-std::vector<geometry_msgs::Pose> getCircleIntersections(geometry_msgs::Pose waypoint, geometry_msgs::Pose nextWaypoint, geometry_msgs::Pose robot, double distance) {
+std::vector<geometry_msgs::Pose> getCircleIntersectionsByY(geometry_msgs::Pose waypoint, geometry_msgs::Pose nextWaypoint, geometry_msgs::Pose robot, double distance) {
+	// zie papier voor uitwerking
+	double rpx = robot.position.x;
+	double rpy = robot.position.y;
+
+	double wx1 = waypoint.position.x;
+	double wy1 = waypoint.position.y;
+
+	double wx2 = nextWaypoint.position.x;
+	double wy2 = nextWaypoint.position.y;
+
+	
+	double a = 1;	
+	double b = -2*rpy;
+	double c = rpy*rpy + wx1*wx1 - 2*rpx*wx1 + rpx*rpx - distance*distance;
+	double D = (b*b - 4*a*c);
+
+	if (D < 0.0) {
+		return std::vector<geometry_msgs::Pose>();
+	}
+	
+	double y1 = (-b + sqrt(D))/(2*a);
+	double y2 = (-b - sqrt(D))/(2*a);
+
+	if (D == 0.0) {
+		std::vector<geometry_msgs::Pose> points {
+			make2DPose(wx1, y1)
+		};
+		return points;
+	}
+
+	std::vector<geometry_msgs::Pose> points {
+		make2DPose(wx1, y1),
+		make2DPose(wx1, y2)
+	};
+
+	return points;
+}
+
+std::vector<geometry_msgs::Pose> getCircleIntersectionsByX(geometry_msgs::Pose waypoint, geometry_msgs::Pose nextWaypoint, geometry_msgs::Pose robot, double distance) {
 	// zie bord voor uitwerking
 	double rpx = robot.position.x;
 	double rpy = robot.position.y;
@@ -79,30 +108,15 @@ std::vector<geometry_msgs::Pose> getCircleIntersections(geometry_msgs::Pose wayp
 	double wy2 = nextWaypoint.position.y;
 
 	double dx = wx2 - wx1;
-	//ROS_INFO("dx: %.3lf\n", dx);
-
 	double dy = wy2 - wy1;
-	//ROS_INFO("dy: %.3lf\n", dy);
 	
 	double a_l = dx == 0.0 ? 0.0 : dy/dx;
-	//ROS_INFO("a_l: %.3lf\n", a_l);
-	
 	double b_l = wy1 - a_l * wx1;
-	//ROS_INFO("b_l: %.3lf\n", b_l);
-	
-	//ROS_INFO("y = %.3lfx+%.3lf", a_l, b_l);
-	
-	double a = a_l*a_l + 1;
-	//ROS_INFO("a: %.3lf\n", a);
-	
+		
+	double a = a_l*a_l + 1;	
 	double b = -2*rpx + 2*a_l*(b_l-rpy);
-	//ROS_INFO("b: %.3lf\n", b);
-
 	double c = rpx*rpx + (b_l - rpy)*(b_l - rpy) - distance*distance;
-	//ROS_INFO("c: %.3lf\n", c);
-
 	double D = (b*b - 4*a*c);
-	//ROS_INFO("D: %.3lf\n", D);
 
 	if (D < 0.0) {
 		return std::vector<geometry_msgs::Pose>();
@@ -126,9 +140,20 @@ std::vector<geometry_msgs::Pose> getCircleIntersections(geometry_msgs::Pose wayp
 		make2DPose(x2, y2)
 	};
 	
-	//ROS_INFO("(%.3lf, %.3lf) and (%.3lf, %.3lf)\n", x1, y1, x2, y2);
-
 	return points;
+}
+std::vector<geometry_msgs::Pose> getCircleIntersections(geometry_msgs::Pose waypoint, geometry_msgs::Pose nextWaypoint, geometry_msgs::Pose robot, double distance) {
+	std::vector<geometry_msgs::Pose> intersections;
+
+	ROS_INFO("Path x1: %f, x2: %f", waypoint.position.x, nextWaypoint.position.x);
+
+	double diff = waypoint.position.x - nextWaypoint.position.x;
+	if(fabs(diff) < 0.01) {
+		intersections = getCircleIntersectionsByY(waypoint, nextWaypoint, robot, distance);
+	} else {
+		intersections = getCircleIntersectionsByX(waypoint, nextWaypoint, robot, distance);
+	}
+	return intersections;
 }
 
 void cbPath(const nav_msgs::Path::ConstPtr &msg) {
@@ -156,21 +181,25 @@ geometry_msgs::Pose getClosest(geometry_msgs::Pose goal, std::vector<geometry_ms
 }
 
 void moveToNextPosition() {
-	auto intersectionsToNextPoint = getCircleIntersections(g_goals[g_goalCount+1].pose, g_goals[g_goalCount+2].pose, g_currentPose, lookAhead);
+	auto intersectionsToNextPoint = getCircleIntersections(g_goals[1].pose, g_goals[2].pose, g_currentPose, lookAhead);
 
-	if (intersectionsToNextPoint.size() > 0) {
-		g_goalCount++;
+	ROS_INFO("inttopoint: %d", (int)intersectionsToNextPoint.size());
+
+	if(intersectionsToNextPoint.size() > 0) {
+		g_goals.erase(g_goals.begin() + 1);
 	}
 
-	auto intersections = getCircleIntersections(g_goals[g_goalCount].pose, g_goals[g_goalCount+1].pose, g_currentPose, lookAhead);
+	auto intersections = getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, lookAhead);
+
+	ROS_INFO("int: %d", (int)intersections.size());
 
 	if (intersections.size() == 0) {
 		// recalculate with bigger radius?
-		double wx1 = g_goals[g_goalCount].pose.position.x;
-		double wy1 = g_goals[g_goalCount].pose.position.y;
+		double wx1 = g_goals[0].pose.position.x;
+		double wy1 = g_goals[0].pose.position.y;
 	
-		double wx2 = g_goals[g_goalCount+1].pose.position.x;
-		double wy2 = g_goals[g_goalCount+1].pose.position.y;
+		double wx2 = g_goals[1].pose.position.x;
+		double wy2 = g_goals[1].pose.position.y;
 	
 		double dx = wx2 - wx1;
 		double dy = wy2 - wy1;
@@ -185,19 +214,17 @@ void moveToNextPosition() {
 		double y = a2*x+b2;
 		// point
 		double newDist = getDistBetweenPoses2D(make2DPose(x, y), g_currentPose);
-		intersections = getCircleIntersections(g_goals[g_goalCount].pose, g_goals[g_goalCount+1].pose, g_currentPose, newDist);
+		intersections = getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, newDist);
 	}
 	
-	geometry_msgs::Pose closestToGoal = getClosest(g_goals[g_goalCount].pose, intersections);
-	ROS_INFO("closest: x: %lf, y: %lf", 
-		closestToGoal.position.x, 
-	 	closestToGoal.position.y);
+	geometry_msgs::Pose closestToGoal = getClosest(g_goals[0].pose, intersections);
+	
 
 	// robot move to closestToGoal
 	geometry_msgs::Twist vel_msg;
 	vel_msg.linear.x = fmin(getDistBetweenPoses2D(g_currentPose, closestToGoal), 5.0);
 	vel_msg.angular.z = fmin(getAngleBetweenPoses2D(g_currentPose, closestToGoal), 3.14);
-	//ROS_INFO("spd: %lf ang: %lf", vel_msg.linear.x, vel_msg.angular.z);
+	ROS_INFO("spd: %lf ang: %lf", vel_msg.linear.x, vel_msg.angular.z);
 	g_velPublisher.publish(vel_msg);	
 }
 

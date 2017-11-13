@@ -43,7 +43,9 @@ geometry_msgs::PoseStamped makePoseStamped(double pX, double pY, double pZ, doub
 }
 
 void makePath() {
-	geometry_msgs::PoseStamped pose = makePoseStamped(5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	geometry_msgs::PoseStamped pose = makePoseStamped(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	path.push_back(pose);
+	pose = makePoseStamped(5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 	path.push_back(pose);
 	pose = makePoseStamped(5.0, 5.0, 0.0, 0.0, 0.0, 0.7071068, 0.7071068);
 	path.push_back(pose);
