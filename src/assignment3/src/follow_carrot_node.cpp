@@ -11,6 +11,8 @@
 #include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
 
+// limit the speed to 1.0 units/second
+const double g_maxSpeed = 1.0;
 const double g_lookAhead = 1.0;
 const double g_tolerance = 0.01;
 const double g_gain = 4.0;
@@ -239,9 +241,8 @@ void moveToNextPosition() {
 	// robot move to closestToGoal
 	geometry_msgs::Twist vel_msg;
 
-	// limit the speed to 1.0 units/second
-	double maxSpeed = 1.0;
-	vel_msg.linear.x = fmin(distToNextGoal, maxSpeed);
+	
+	vel_msg.linear.x = fmin(distToNextGoal, g_maxSpeed);
 	double deltaAngle = getAngleBetweenPoses2D(g_currentPose, closestToGoal);	
 	double currAngle = tf::getYaw(g_currentPose.orientation);
 
