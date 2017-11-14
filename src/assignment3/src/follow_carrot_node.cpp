@@ -15,7 +15,8 @@
 const double g_maxSpeed = 1.0;
 const double g_lookAhead = 1.0;
 const double g_tolerance = 0.01;
-const double g_gain = 4.0;
+const double g_gain = 2.0;
+const double g_pow = 1.0;
 ros::Publisher g_velPublisher;
 geometry_msgs::Pose g_currentPose;
 std::vector<geometry_msgs::PoseStamped, std::allocator<geometry_msgs::PoseStamped>> g_goals;
@@ -202,6 +203,10 @@ double findPerpendicularDistance(float multiplier) {
 	return distance * multiplier;
 }
 
+double map(double x, double in_min, double in_max, double out_min, double out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 void moveToNextPosition() {
 	auto intersectionsToNextPoint = getCircleIntersections(g_goals[1].pose, g_goals[2].pose, g_currentPose, g_lookAhead);
 
@@ -242,11 +247,19 @@ void moveToNextPosition() {
 	geometry_msgs::Twist vel_msg;
 
 	
-	vel_msg.linear.x = fmin(distToNextGoal, g_maxSpeed);
 	double deltaAngle = getAngleBetweenPoses2D(g_currentPose, closestToGoal);	
 	double currAngle = tf::getYaw(g_currentPose.orientation);
 
 	double turnSpeed = getAngular(deltaAngle, currAngle, g_gain);
+	if (distToNextGoal < g_lookAhead) {
+		vel_msg.linear.x = fmin(distToNextGoal, g_maxSpeed);
+	}
+	else {
+		double tmpSpd = map(M_PI - fabs(turnSpeed/g_gain), 0, M_PI, 0.0, 1.0);
+		tmpSpd = pow(tmpSpd, g_pow);
+		vel_msg.linear.x = tmpSpd * g_maxSpeed;
+	}
+	ROS_INFO("Vel: %lf", vel_msg.linear.x);
 
 	vel_msg.angular.z = turnSpeed;
 
