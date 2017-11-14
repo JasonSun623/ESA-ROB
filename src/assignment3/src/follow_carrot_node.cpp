@@ -14,11 +14,10 @@
 
 const double g_lookAhead = 1.0;
 const double g_tolerance = 0.01;
-const double g_gain = 2.0;
+const double g_gain = 4.0;
 ros::Publisher g_velPublisher;
 geometry_msgs::Pose g_currentPose;
 std::vector<geometry_msgs::PoseStamped, std::allocator<geometry_msgs::PoseStamped>> g_goals;
-int g_goalCount = 0;
 
 double rad2deg(double rad) {
     return (rad*(180/M_PI));
@@ -247,7 +246,7 @@ void moveToNextPosition() {
 	double deltaAngle = getAngleBetweenPoses2D(g_currentPose, closestToGoal);	
 	double currAngle = tf::getYaw(g_currentPose.orientation);
 
-	double turnSpeed = 2.0*getAngular(deltaAngle, currAngle, g_gain);
+	double turnSpeed = getAngular(deltaAngle, currAngle, g_gain);
 
 	vel_msg.angular.z = turnSpeed;
 

@@ -15,9 +15,9 @@ The local planner was a bit more complex. First we tried to think about how to n
 
 We tried to calculate this by ourselves instead of using some library, for a nostalgic throwback to high school. Sadly we made a series of mistakes, so we spent a whole day on calculating these intersections. The errors we made are sloppy, forgetting to square several terms and just miscalculations.
 
-After that worked, we also had trouble getting the robot to follow the calculated point. 
+After that worked, we also had trouble getting the robot to follow the calculated point, caused by how the difference between the `x>pi` and `x<-pi` being larger than `pi`, but this was solved by applying the fix in the error calculation, and not to the positions and targets.
 
-
+<leg implementatie uit Lars>
 
 # Running instructions  
 
@@ -38,7 +38,10 @@ To publish goals:
 
 # Tests and Observations  
 
-Nee
+Clean demo:
+https://www.youtube.com/watch?v=upIzUatskR0
+
+Demoing manual error:
+https://www.youtube.com/watch?v=xTyJA5q1sEk
 
 # Graph 
-Nee stop

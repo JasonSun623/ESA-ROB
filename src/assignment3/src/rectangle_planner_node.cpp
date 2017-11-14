@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
 	ros::Rate loop_rate(100);
 
 	ROS_INFO("zzz");
-	ros::Duration(5.00).sleep();
+	ros::Duration(2.00).sleep();
 	ROS_INFO("!zzz");
 	
 	makePath();
