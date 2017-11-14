@@ -8,7 +8,9 @@
 ros::Publisher path_publisher;
 std::vector<geometry_msgs::PoseStamped> path;
 
-// Jammer dit ROS...
+/* PoseStamped doesn't have a contstructor where you can set the values, so we
+ * had to create the following function.
+ */
 geometry_msgs::PoseStamped makePoseStamped(double pX, double pY, double pZ, double qX, double qY, double qZ, double qW) {
 	geometry_msgs::Point p;
 	geometry_msgs::Quaternion q;
@@ -59,7 +61,6 @@ int main(int argc, char **argv) {
 	ROS_INFO("zzz");
 	ros::Duration(2.00).sleep();
 	ROS_INFO("!zzz");
-	
 	makePath();
 	ROS_INFO("path available");
 	

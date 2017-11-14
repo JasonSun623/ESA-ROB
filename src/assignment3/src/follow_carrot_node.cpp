@@ -7,7 +7,6 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
-#include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
