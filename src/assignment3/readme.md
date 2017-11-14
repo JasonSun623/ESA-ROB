@@ -42,16 +42,18 @@ To run the rectangle path just replace the last line to this:
 roslaunch assignment3 assigment3_rectangle.launch
 ```
 
-# Tests and Observations  
+# Tests and Observations
+
+We chose for YouTube videos instead of screencaps, because the trails weren't very clear. 
 
 Clean demo:
 https://www.youtube.com/watch?v=upIzUatskR0
 
-We can see the robot moving along the path is was given, creating a triangle or a square.
+We can see the robot moving along the path that was given, creating a triangle or a square.
 
 Now we wanted to make shure that the robot still follows it's path if it's moved by the user, so we moved the robot in the visualizer and we can see the robot moving back to it's path, even if it's outside of the lookahead distance.
 
-Demoing manual error:
+Demoing manipulating robot:
 https://www.youtube.com/watch?v=xTyJA5q1sEk
 
 # Graph 
