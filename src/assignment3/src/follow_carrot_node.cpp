@@ -16,8 +16,9 @@
 #include <turtlesim/Spawn.h>
 #include <tf/transform_listener.h>
 
-const double lookAhead = 1.0;
-const double tolerance = 0.01;
+const double g_lookAhead = 1.0;
+const double g_tolerance = 0.01;
+const double g_gain = 2.0;
 ros::Publisher g_velPublisher;
 geometry_msgs::Pose g_currentPose;
 std::vector<geometry_msgs::PoseStamped, std::allocator<geometry_msgs::PoseStamped>> g_goals;
@@ -165,7 +166,7 @@ void cbPath(const nav_msgs::Path::ConstPtr &msg) {
 		//ROS_INFO("x: %lf, y: %lf", goal.pose.position.x, goal.pose.position.y);		
 		geometry_msgs::PoseStamped::ConstPtr goalPtr(new geometry_msgs::PoseStamped(goal));
 	}
-	//getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, lookAhead);
+	//getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, g_);
 }
 
 // there are only two points at most in points;
@@ -183,65 +184,75 @@ geometry_msgs::Pose getClosest(geometry_msgs::Pose goal, std::vector<geometry_ms
 	return closestPose;
 }
 
-/*
- * Taken from the previous assignment, which took it from this source:
- * https://github.com/aniskoubaa/lab_exams/blob/master/src/shape_drawing/shape_drawing.cpp
- */
-double getAngular(double dest_angle, double curr_angle){
-	PID pid = PID(1, 2.0*M_PI, 2.0*-M_PI, 1, 0.00, 0.0);
-	double error = pid.calculate(dest_angle, curr_angle);
+double getAngular(double dest_angle, double curr_angle, double gain){
+	double error = gain * (dest_angle - curr_angle);
 	return error;
 }
 
-void moveToNextPosition() {
-	auto intersectionsToNextPoint = getCircleIntersections(g_goals[1].pose, g_goals[2].pose, g_currentPose, lookAhead);
+double findPerpendicularDistance(float multiplier) {
+	// recalculate with bigger radius
+	double wx1 = g_goals[0].pose.position.x;
+	double wy1 = g_goals[0].pose.position.y;
 
-	//ROS_INFO("inttopoint: %d", (int)intersectionsToNextPoint.size());
+	double wx2 = g_goals[1].pose.position.x;
+	double wy2 = g_goals[1].pose.position.y;
+
+	double dx = wx2 - wx1;
+	double dy = wy2 - wy1;
+	double a1 = dx == 0.0 ? 0.0 : dy/dx;
+	double b1 = wy1 - a1 * wx1;
+
+	// find perpendicular coordinate on the line we should follow
+	double a2 = -1/(a1);
+	double b2 = g_currentPose.position.y - a2 * g_currentPose.position.x;
+	
+	double x = (b1-b2)/(a2-a1);
+	double y = a2*x+b2;
+	return multiplier * getDistBetweenPoses2D(make2DPose(x, y), g_currentPose);
+}
+
+void moveToNextPosition() {
+	auto intersectionsToNextPoint = getCircleIntersections(g_goals[1].pose, g_goals[2].pose, g_currentPose, g_lookAhead);
 
 	if(intersectionsToNextPoint.size() > 0) {
-		if (g_goals.size() > 1 && getDistBetweenPoses2D(g_currentPose, g_goals[1].pose) < lookAhead) {
+		// Always keep two points to create a following line!
+		if (g_goals.size() > 2 && getDistBetweenPoses2D(g_currentPose, g_goals[1].pose) < g_lookAhead) {
 			g_goals.erase(g_goals.begin());
 			ROS_INFO("Removed g_goals[0], goals left: %d", (int)g_goals.size());
 			ROS_INFO("Intersections: %d", (int)intersectionsToNextPoint.size());
 		}
 	}
 
-	auto intersections = getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, lookAhead);
+	auto intersections = getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, g_lookAhead);
 
 	if (intersections.size() == 0) {
 		ROS_WARN("No intersections!");
 
-		// recalculate with bigger radius?
-		double wx1 = g_goals[0].pose.position.x;
-		double wy1 = g_goals[0].pose.position.y;
-	
-		double wx2 = g_goals[1].pose.position.x;
-		double wy2 = g_goals[1].pose.position.y;
-	
-		double dx = wx2 - wx1;
-		double dy = wy2 - wy1;
-		double a1 = dx == 0.0 ? 0.0 : dy/dx;
-		double b1 = wy1 - a1 * wx1;
-
-		// perpendicular
-		double a2 = -1/(a1);
-		double b2 = g_currentPose.position.y - a2 * g_currentPose.position.x;
-		
-		double x = (b1-b2)/(a2-a1);
-		double y = a2*x+b2;
-		// point
-		double newDist = 1.1*getDistBetweenPoses2D(make2DPose(x, y), g_currentPose);
+		double newDist = findPerpendicularDistance(1.1);
 		intersections = getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, newDist);
 	}
 	
 	geometry_msgs::Pose closestToGoal = getClosest(g_goals[1].pose, intersections);
 
 	double distToNextGoal = getDistBetweenPoses2D(g_currentPose, g_goals[1].pose);
-	ROS_INFO("Dist: %lf", distToNextGoal);
+	//ROS_INFO("Dist: %lf", distToNextGoal);
+
+	if (g_goals.size() == 2 && distToNextGoal < g_tolerance) {
+		g_goals.clear();
+		ROS_INFO("Done!");
+		geometry_msgs::Twist vel_msg_stop;
+		g_velPublisher.publish(vel_msg_stop);
+		return;
+	}
 
 	// robot move to closestToGoal
 	geometry_msgs::Twist vel_msg;
-	vel_msg.linear.x = fmin(distToNextGoal, 1.0);
+
+	// limit the speed to 1.0 units/second
+	double maxSpeed = 1.0;
+	// limit the rotation speed to 1.0 turns/second
+	double maxTurnSpeed = 2*M_PI;
+	vel_msg.linear.x = fmin(distToNextGoal, maxSpeed);
 	double deltaAngle = getAngleBetweenPoses2D(g_currentPose, closestToGoal);	
 	double currAngle = tf::getYaw(g_currentPose.orientation);
 	if (deltaAngle < 0) {
@@ -250,20 +261,13 @@ void moveToNextPosition() {
 	if (currAngle < 0) {
 		currAngle = currAngle+2*M_PI;
 	}
-	double turnSpeed = 4.0*getAngular(deltaAngle, currAngle);
+	double turnSpeed = fmin(2.0*getAngular(deltaAngle, currAngle, g_gain), maxTurnSpeed);
 
 	vel_msg.angular.z = turnSpeed;
 
 	//ROS_INFO("Goal: %lf, %lf", closestToGoal.position.x,  closestToGoal.position.y);
 	//ROS_INFO("dA: %lf, w: %lf", deltaAngle, turnSpeed);
-
-	if (g_goals.size() < 2 && distToNextGoal < tolerance) {
-		g_goals.clear();
-		ROS_INFO("Done!");
-		geometry_msgs::Twist vel_msg_stop;
-		g_velPublisher.publish(vel_msg_stop);
-		return;
-	}
+	
 	g_velPublisher.publish(vel_msg);	
 }
 
