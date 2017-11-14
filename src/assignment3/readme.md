@@ -15,11 +15,15 @@ The local planner was a bit more complex. First we tried to think about how to n
 
 We tried to calculate this by ourselves instead of using some library, for a nostalgic throwback to high school. Sadly we made a series of mistakes, so we spent a whole day on calculating these intersections. The errors we made are sloppy, forgetting to square several terms and just miscalculations.
 
-We used the *Quadratic Formula* to get the intersections of the path and the lookahead circle. The formula of the circle is (x-robotposition.x)^2 + (y-robotposition.y) = lookahed^2
+We used the [*Quadratic Formula*](http://www.purplemath.com/modules/quadform.htm) to get the intersections of the path and the lookahead circle. The formula of the circle is `(x - robotposition.x)^2 + (y - robotposition.y) = lookahead^2` and the formula of the line through two waypoints is `y = a * x + b` where *a* is the magnitude and *b* the offset. To calculate the intersections we substitute the *y* of circle formula with the *y* of the line formula so we get the following formula `(x - robotposition.x)^2 + (a * x + b - robotposition.y) = lookahead^2`. Using the [*Quadratic Formula*](http://www.purplemath.com/modules/quadform.htm) we can calculate the points where the line and circle intersect.
+
+We found out that this doesn't work if the line through two waypoints is vertical. If this happens we have to calculate the *y* instead of the *x* using the [*Quadratic Formula*](http://www.purplemath.com/modules/quadform.htm). We have the same formula for the circle but the formula for the line is just `x = waypoint.x` so now we have to subsitute *x* resulting in the following formula: `(waypoint.x - robotposition.x)^2 + (y - robotposition.y) = lookahead^2`. Now we can do the same trick using the [*Quadratic Formula*](http://www.purplemath.com/modules/quadform.htm).
+
+Most times we retrieve two points from this formula. We have to make sure we follow the right point so we have to check wich point is closest to the waypoint. Now we got the right point on the lookahead circle and can start moving towards this point.
+
+If we dont find a point on the lookahead circle we have to find the shortest way back to the path. We use the line between the two waypoints and calculate the perpendicular line and the distance from the robot to the line. Now we can navigate back to this line and if it's back in range it will start following the line again using the lookahead circle.
 
 After that worked, we also had trouble getting the robot to follow the calculated point, caused by how the difference between the `x>pi` and `x<-pi` being larger than `pi`, but this was solved by applying the fix in the error calculation, and not to the positions and targets.
-
-<leg implementatie uit Lars>
 
 # Running instructions  
 
