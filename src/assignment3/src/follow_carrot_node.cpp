@@ -185,8 +185,16 @@ geometry_msgs::Pose getClosest(geometry_msgs::Pose goal, std::vector<geometry_ms
 }
 
 double getAngular(double dest_angle, double curr_angle, double gain){
-	double error = gain * (dest_angle - curr_angle);
-	return error;
+	double error = (dest_angle - curr_angle);
+	// account for how angles are reported. If the error is too big, we add or substract
+	// 2pi to get the smallest error.
+	if (error > M_PI) {
+		error -= 2.0*M_PI;
+	}
+	if (error < -M_PI) {
+		error += 2.0*M_PI;
+	}
+	return gain * error;
 }
 
 double findPerpendicularDistance(float multiplier) {
@@ -226,20 +234,21 @@ void moveToNextPosition() {
 	auto intersections = getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, g_lookAhead);
 
 	if (intersections.size() == 0) {
-		ROS_WARN("No intersections!");
-
+		ROS_WARN("No intersections! Calculating shortest point to path");
 		double newDist = findPerpendicularDistance(1.1);
 		intersections = getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, newDist);
+		ROS_WARN("New intersects: %d", (int)intersections.size());
+		if (intersections.size() == 0) ROS_ERROR("Can't find intersections");
 	}
 	
 	geometry_msgs::Pose closestToGoal = getClosest(g_goals[1].pose, intersections);
 
 	double distToNextGoal = getDistBetweenPoses2D(g_currentPose, g_goals[1].pose);
-	//ROS_INFO("Dist: %lf", distToNextGoal);
+	ROS_DEBUG("Dist: %lf", distToNextGoal);
 
 	if (g_goals.size() == 2 && distToNextGoal < g_tolerance) {
 		g_goals.clear();
-		ROS_INFO("Done!");
+		ROS_INFO("Done navigating!");
 		geometry_msgs::Twist vel_msg_stop;
 		g_velPublisher.publish(vel_msg_stop);
 		return;
@@ -250,24 +259,18 @@ void moveToNextPosition() {
 
 	// limit the speed to 1.0 units/second
 	double maxSpeed = 1.0;
-	// limit the rotation speed to 1.0 turns/second
-	double maxTurnSpeed = 2*M_PI;
 	vel_msg.linear.x = fmin(distToNextGoal, maxSpeed);
 	double deltaAngle = getAngleBetweenPoses2D(g_currentPose, closestToGoal);	
 	double currAngle = tf::getYaw(g_currentPose.orientation);
-	if (deltaAngle < 0) {
-		deltaAngle = deltaAngle+2*M_PI;
-	}
-	if (currAngle < 0) {
-		currAngle = currAngle+2*M_PI;
-	}
-	double turnSpeed = fmin(2.0*getAngular(deltaAngle, currAngle, g_gain), maxTurnSpeed);
+
+	double turnSpeed = 2.0*getAngular(deltaAngle, currAngle, g_gain);
 
 	vel_msg.angular.z = turnSpeed;
 
-	//ROS_INFO("Goal: %lf, %lf", closestToGoal.position.x,  closestToGoal.position.y);
-	//ROS_INFO("dA: %lf, w: %lf", deltaAngle, turnSpeed);
-	
+	ROS_DEBUG("Goal: %lf, %lf", closestToGoal.position.x,  closestToGoal.position.y);
+	ROS_DEBUG("dA: %lf, A: %lf", deltaAngle, currAngle);
+	ROS_DEBUG("turnSpeed: %lf", turnSpeed);
+
 	g_velPublisher.publish(vel_msg);	
 }
 
