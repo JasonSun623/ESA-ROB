@@ -9,11 +9,6 @@ find_package(catkin REQUIRED COMPONENTS
   #message_generation
 )
 
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-)
-
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES pid_assignment_2
