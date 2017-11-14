@@ -23,7 +23,7 @@ Most times we retrieve two points from this formula. We have to make sure we fol
 
 If we dont find a point on the lookahead circle we have to find the shortest way back to the path. We use the line between the two waypoints and calculate the perpendicular line and the distance from the robot to the line. Now we can navigate back to this line and if it's back in range it will start following the line again using the lookahead circle.
 
-After that worked, we also had trouble getting the robot to follow the calculated point, caused by how the difference between the `x>pi` and `x<-pi` being larger than `pi`, but this was solved by applying the fix in the error calculation, and not to the positions and targets.
+After that worked, we also had trouble getting the robot to follow the calculated point. Whenever the angle was flipped between `-pi` and `+pi` the robots behavior became erratic. This is caused by how the difference between the `x>pi` and `x<-pi` being larger than `pi`.  Finally, this was solved by adding `2*pi` or substracting `2*pi` in the error calculation, so the robot turns the shortest angle.
 
 # Running instructions  
 
@@ -44,14 +44,14 @@ roslaunch assignment3 assigment3_rectangle.launch
 
 # Tests and Observations
 
-We chose for YouTube videos instead of screencaps, because the trails weren't very clear. 
+We chose for YouTube videos instead of screencaps, because the trails weren't very clearand interaction with Stage removed the trials. 
 
 Clean demo:
 https://www.youtube.com/watch?v=upIzUatskR0
 
 We can see the robot moving along the path that was given, creating a triangle or a square.
 
-Now we wanted to make shure that the robot still follows it's path if it's moved by the user, so we moved the robot in the visualizer and we can see the robot moving back to it's path, even if it's outside of the lookahead distance.
+Now we wanted to make sure that the robot still follows it's path if it's moved by the user, so we moved the robot in the visualizer and we can see the robot moving back to it's path, even if it's outside of the lookahead distance.
 
 Demoing manipulating robot:
 https://www.youtube.com/watch?v=xTyJA5q1sEk
@@ -59,3 +59,7 @@ https://www.youtube.com/watch?v=xTyJA5q1sEk
 # Graph 
 
 ![Graph](./assignment3-rosgraph.png)
+
+# TF tree
+
+![Tree](./assignment3-tftree.png)
