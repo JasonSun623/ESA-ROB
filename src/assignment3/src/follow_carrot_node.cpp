@@ -2,18 +2,14 @@
  * Follow-the-carrot node
  */
 
+#include <math.h>
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
-#include <geometry_msgs/PoseWithCovariance.h>
 #include <nav_msgs/Odometry.h>
-#include <math.h>
-#include <tf/transform_datatypes.h>
-#include <angles/angles.h>
 #include <nav_msgs/Path.h>
-#include "pid.h"
-#include <turtlesim/Spawn.h>
+#include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
 
 const double g_lookAhead = 1.0;
@@ -61,7 +57,6 @@ geometry_msgs::Pose make2DPose(double x, double y) {
 }
 
 std::vector<geometry_msgs::Pose> getCircleIntersectionsByY(geometry_msgs::Pose waypoint, geometry_msgs::Pose nextWaypoint, geometry_msgs::Pose robot, double distance) {
-	// zie papier voor uitwerking
 	double rpx = robot.position.x;
 	double rpy = robot.position.y;
 
@@ -100,7 +95,6 @@ std::vector<geometry_msgs::Pose> getCircleIntersectionsByY(geometry_msgs::Pose w
 }
 
 std::vector<geometry_msgs::Pose> getCircleIntersectionsByX(geometry_msgs::Pose waypoint, geometry_msgs::Pose nextWaypoint, geometry_msgs::Pose robot, double distance) {
-	// zie bord voor uitwerking
 	double rpx = robot.position.x;
 	double rpy = robot.position.y;
 
@@ -148,8 +142,6 @@ std::vector<geometry_msgs::Pose> getCircleIntersectionsByX(geometry_msgs::Pose w
 std::vector<geometry_msgs::Pose> getCircleIntersections(geometry_msgs::Pose waypoint, geometry_msgs::Pose nextWaypoint, geometry_msgs::Pose robot, double distance) {
 	std::vector<geometry_msgs::Pose> intersections;
 
-	//ROS_INFO("Path x1: %f, x2: %f", waypoint.position.x, nextWaypoint.position.x);
-
 	double diff = waypoint.position.x - nextWaypoint.position.x;
 	if(fabs(diff) < 0.01) {
 		intersections = getCircleIntersectionsByY(waypoint, nextWaypoint, robot, distance);
@@ -163,10 +155,8 @@ void cbPath(const nav_msgs::Path::ConstPtr &msg) {
 	g_goals = msg->poses;
 	ROS_INFO("Path sz: %d", (int)g_goals.size());
 	for (auto goal : g_goals) {
-		//ROS_INFO("x: %lf, y: %lf", goal.pose.position.x, goal.pose.position.y);		
 		geometry_msgs::PoseStamped::ConstPtr goalPtr(new geometry_msgs::PoseStamped(goal));
 	}
-	//getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, g_);
 }
 
 // there are only two points at most in points;
@@ -197,33 +187,26 @@ double getAngular(double dest_angle, double curr_angle, double gain){
 	return gain * error;
 }
 
-double findPerpendicularDistance(float multiplier) {
-	// recalculate with bigger radius
+double findPerpendicularDistance(float multiplier) {	
 	double wx1 = g_goals[0].pose.position.x;
 	double wy1 = g_goals[0].pose.position.y;
 
 	double wx2 = g_goals[1].pose.position.x;
 	double wy2 = g_goals[1].pose.position.y;
 
-	double dx = wx2 - wx1;
-	double dy = wy2 - wy1;
-	double a1 = dx == 0.0 ? 0.0 : dy/dx;
-	double b1 = wy1 - a1 * wx1;
+	double px = g_currentPose.position.x;
+	double py = g_currentPose.position.y;
 
-	// find perpendicular coordinate on the line we should follow
-	double a2 = -1/(a1);
-	double b2 = g_currentPose.position.y - a2 * g_currentPose.position.x;
-	
-	double x = (b1-b2)/(a2-a1);
-	double y = a2*x+b2;
-	return multiplier * getDistBetweenPoses2D(make2DPose(x, y), g_currentPose);
+	// https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
+	double distance = fabs((wy2-wy1)*px - (wx2-wx1)*py + wx2*wy1 - wy2*wx1)/sqrt(pow(wy2-wy1,2.0)+pow(wx2-wx1,2.0));
+	return distance * multiplier;
 }
 
 void moveToNextPosition() {
 	auto intersectionsToNextPoint = getCircleIntersections(g_goals[1].pose, g_goals[2].pose, g_currentPose, g_lookAhead);
 
 	if(intersectionsToNextPoint.size() > 0) {
-		// Always keep two points to create a following line!
+		// Always keep two points to create a line the robot can follow!
 		if (g_goals.size() > 2 && getDistBetweenPoses2D(g_currentPose, g_goals[1].pose) < g_lookAhead) {
 			g_goals.erase(g_goals.begin());
 			ROS_INFO("Removed g_goals[0], goals left: %d", (int)g_goals.size());
@@ -236,6 +219,7 @@ void moveToNextPosition() {
 	if (intersections.size() == 0) {
 		ROS_WARN("No intersections! Calculating shortest point to path");
 		double newDist = findPerpendicularDistance(1.1);
+		ROS_WARN("newDist: %lf", newDist);
 		intersections = getCircleIntersections(g_goals[0].pose, g_goals[1].pose, g_currentPose, newDist);
 		ROS_WARN("New intersects: %d", (int)intersections.size());
 		if (intersections.size() == 0) ROS_ERROR("Can't find intersections");
