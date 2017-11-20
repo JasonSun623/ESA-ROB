@@ -8,7 +8,7 @@ Panels:
         - /Status1
         - /RobotModel1
         - /TF1
-      Splitter Ratio: 0.5
+      Splitter Ratio: 0.6
     Tree Height: 557
   - Class: rviz/Selection
     Name: Selection
@@ -70,7 +70,7 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-      Name: RobotModel
+      Name: SwekBot by MT & LJ
       Robot Description: robot_description
       TF Prefix: ""
       Update Interval: 0
