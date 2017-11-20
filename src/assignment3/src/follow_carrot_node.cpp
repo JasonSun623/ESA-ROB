@@ -13,10 +13,10 @@
 
 // limit the speed to 1.0 units/second
 const double g_maxSpeed = 1.0;
-const double g_lookAhead = 1.0;
+const double g_lookAhead = 0.75;
 const double g_tolerance = 0.01;
-const double g_gain = 2.0;
-const double g_pow = 1.0;
+const double g_gain = 4.0;
+const double g_pow = 3.0;
 ros::Publisher g_velPublisher;
 geometry_msgs::Pose g_currentPose;
 std::vector<geometry_msgs::PoseStamped, std::allocator<geometry_msgs::PoseStamped>> g_goals;
@@ -259,7 +259,7 @@ void moveToNextPosition() {
 		tmpSpd = pow(tmpSpd, g_pow);
 		vel_msg.linear.x = tmpSpd * g_maxSpeed;
 	}
-	ROS_INFO("Vel: %lf", vel_msg.linear.x);
+	ROS_DEBUG("Vel: %lf", vel_msg.linear.x);
 
 	vel_msg.angular.z = turnSpeed;
 
