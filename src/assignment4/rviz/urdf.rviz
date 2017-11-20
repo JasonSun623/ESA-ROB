@@ -88,8 +88,8 @@ Visualization Manager:
       Marker Scale: 0.5
       Name: TF
       Show Arrows: true
-      Show Axes: true
-      Show Names: true
+      Show Axes: false
+      Show Names: false
       Tree:
         base_link:
           right_leg:
