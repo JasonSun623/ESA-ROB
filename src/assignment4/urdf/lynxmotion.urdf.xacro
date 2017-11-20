@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot name="macroed" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="Swekbot 1.33.7" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <xacro:property name="M_PI" value="3.14159"/>
   <xacro:property name="base_width" value="0.069" />
@@ -8,8 +8,11 @@
   <xacro:property name="servo_length" value="0.040" />
   <xacro:property name="shoulder_height" value="0.010" />
   <xacro:property name="shoulder_offset" value="0.015" />
-  <xacro:property name="upperarm_length" value="0.127" />
-  <xacro:property name="hand_length" value="0.086" />
+  <xacro:property name="upperarm_length" value="0.121" />
+  <xacro:property name="lowerarm_length" value="0.127" />
+  <xacro:property name="gripper_length" value="0.086" />
+  <xacro:property name="gripper_size" value="0.015" />
+  
 
   <!-- Links -->
   <link name="base_link">
@@ -48,15 +51,49 @@
     </visual>
   </link>
 
-
-  <!-- <link name="elbow_link">
+  <link name="elbow_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
         <cylinder radius="${servo_width}" length="${servo_length}"/>
       </geometry>
     </visual>
-  </link> -->
+  </link>
+
+  <link name="lowerarm_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${lowerarm_length} ${servo_width} ${servo_width}"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="wrist_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${servo_width}" length="${servo_length}"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="gripper_left">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${gripper_length} ${gripper_size} ${gripper_size}"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="gripper_right">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${gripper_length} ${gripper_size} ${gripper_size}"/>
+      </geometry>
+    </visual>
+  </link>
 
   <!-- Joints -->  
   <joint name="shoulder_rotate_joint" type="revolute">
@@ -81,12 +118,42 @@
     <child link="upperarm_link"/>
   </joint>
 
-  <!-- <joint name="elbow_joint" type="revolute">
-    <origin xyz="0 0 0" rpy="${M_PI/2} 0 0"/>
+  <joint name="elbow_joint" type="revolute">
+    <origin xyz="${upperarm_length/2} 0 0" rpy="${M_PI/2} 0 0"/>
     <parent link="upperarm_link"/>
     <child link="elbow_link"/>
     <axis xyz="0 0 1"/>
     <limit lower="-${M_PI/2}" upper="${M_PI/2}" effort="0" velocity="3.67"/>
-  </joint> -->
+  </joint>
+
+  <joint name="lowerarm_joint" type="fixed">
+    <origin xyz="${lowerarm_length/2} 0 0" rpy="${M_PI/2} 0 0"/>
+    <parent link="elbow_link"/>
+    <child link="lowerarm_link"/>
+  </joint>
+
+  <joint name="wrist_joint" type="revolute">
+    <origin xyz="${upperarm_length/2} 0 0" rpy="${M_PI/2} 0 0"/>
+    <parent link="lowerarm_link"/>
+    <child link="wrist_link"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-${M_PI/2}" upper="${M_PI/2}" effort="0" velocity="3.67"/>
+  </joint>
+
+  <joint name="gripper_left_joint" type="planar">
+    <origin xyz="${upperarm_length/2} 0 0" rpy="${M_PI/2} 0 0"/>
+    <parent link="wrist_link"/>
+    <child link="gripper_left"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-${M_PI/2}" upper="${M_PI/2}" effort="0" velocity="3.67"/>
+  </joint>
+
+  <joint name="gripper_right_joint" type="planar">
+    <origin xyz="${upperarm_length/2} 0 0" rpy="${M_PI/2} 0 0"/>
+    <parent link="wrist_link"/>
+    <child link="gripper_right"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-${M_PI/2}" upper="${M_PI/2}" effort="0" velocity="3.67"/>
+  </joint>
 
 </robot>
