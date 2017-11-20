@@ -6,8 +6,10 @@
   <maintainer email="l.jaeqx@student.fontys.nl">Lars Jaeqx</maintainer>
   <maintainer email="m.diep@student.fontys.nl">Minh-Triet Diep</maintainer>
   <license>GPLv3</license>
-  <build_depend>message_generation</build_depend> 
-  <run_depend>message_runtime</run_depend>
   <buildtool_depend>catkin</buildtool_depend>
-  <export></export>
+  <build_depend>roslaunch</build_depend>
+  <run_depend>joint_state_publisher</run_depend>
+  <run_depend>robot_state_publisher</run_depend>
+  <run_depend>rviz</run_depend>
+  <run_depend>xacro</run_depend>
 </package>
