@@ -10,9 +10,9 @@
   <xacro:property name="shoulder_offset" value="0.015" />
   <xacro:property name="upperarm_length" value="0.121" />
   <xacro:property name="lowerarm_length" value="0.127" />
-  <xacro:property name="gripper_length" value="0.086" />
-  <xacro:property name="gripper_size" value="0.015" />
-  <xacro:property name="gripper_open" value="0.10" />
+  <xacro:property name="gripper_length" value="0.066" />
+  <xacro:property name="gripper_size" value="0.020" />
+  <xacro:property name="gripper_open" value="0.080" />
   
 
   <!-- Links -->
@@ -151,7 +151,7 @@
   </joint>
 
   <joint name="gripper_base_joint" type="fixed">
-    <origin xyz="${servo_width} 0 0" rpy="0 0 0"/>
+    <origin xyz="${servo_width} 0 0" rpy="${M_PI/2} 0 0"/>
     <parent link="wrist_link"/>
     <child link="gripper_base_link"/>
   </joint>
