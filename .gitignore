@@ -64,3 +64,5 @@ devel/
 src/CMakeLists.txt
 .git
 .vscode
+*.sublime-project
+*.sublime-workspace
