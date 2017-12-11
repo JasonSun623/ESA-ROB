@@ -1,0 +1,8 @@
+# Define the goal
+uint32 TurtleGoal
+---
+# Define the result
+uint32 TurtleResult
+---
+# Define a feedback message
+float32 TurtleFeedback
