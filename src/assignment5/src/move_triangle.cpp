@@ -12,7 +12,21 @@ turtlebot_actions::TurtlebotMoveGoal createGoal(float forward_distance, float tu
 	return goal;
 }
 
-void cmdCallback(const assignment5::Triangle::ConstPtr& msg) {
+void doneCb(const actionlib::SimpleClientGoalState& state,
+            const turtlebot_actions::TurtlebotMoveResultConstPtr& result) {
+	ROS_INFO("Finished in state [%s]", state.toString().c_str());
+}
+
+void activeCb() {
+	ROS_INFO("Goal just went active");
+}
+
+void feedbackCb(const turtlebot_actions::TurtlebotMoveFeedbackConstPtr& feedback) {
+	ROS_INFO("Dist: %f, Turn: %f ", feedback->forward_distance, feedback->turn_distance);
+}
+
+void cmdCallback(const assignment5::Triangle::ConstPtr& msg) 
+{
 	actionlib::SimpleActionClient<turtlebot_actions::TurtlebotMoveAction> ac("turtlebot_move", true);
 	ROS_INFO("Waiting for server");
 	ac.waitForServer();
@@ -20,13 +34,14 @@ void cmdCallback(const assignment5::Triangle::ConstPtr& msg) {
 	
 	float cw = msg->cw ? -1.0f : 1.0f;
 	for (int i = 0; i < 3; i++) {
-		ac.sendGoal(createGoal(msg->sideLength, 0));
-		ac.sendGoal(createGoal(0, cw * M_PI/3.0 * 2));
+		ac.sendGoal(createGoal(msg->sideLength, 0), &doneCb, &activeCb, &feedbackCb);
+		ac.sendGoal(createGoal(0, cw * M_PI/3.0 * 2), &doneCb, &activeCb, &feedbackCb);
 	}
 	ROS_INFO("Goal sent");
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) 
+{
 	ros::init(argc, argv, "move_triangle");	
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("cmd", 100, cmdCallback);
