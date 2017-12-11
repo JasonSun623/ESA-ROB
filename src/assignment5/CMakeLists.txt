@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(assignment3)
+project(assignment5)
 
 add_definitions(-std=c++11)
 
@@ -14,11 +14,8 @@ catkin_package()
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(rectangle_planner_node src/rectangle_planner_node.cpp)
-target_link_libraries(rectangle_planner_node ${catkin_LIBRARIES})
+add_executable(action_server src/action_server.cpp)
+target_link_libraries(action_server ${catkin_LIBRARIES})
 
-add_executable(triangle_planner_node src/triangle_planner_node.cpp)
-target_link_libraries(triangle_planner_node ${catkin_LIBRARIES})
-
-add_executable(follow_carrot_node src/follow_carrot_node.cpp)
-target_link_libraries(follow_carrot_node ${catkin_LIBRARIES})
+add_executable(action_client src/action_client.cpp)
+target_link_libraries(action_client ${catkin_LIBRARIES})

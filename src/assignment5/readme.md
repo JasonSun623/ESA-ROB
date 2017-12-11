@@ -18,11 +18,6 @@ source devel/setup.bash
 roslaunch assignment5 assigment5_triangle.launch
 ```
 
-To run the rectangle path just replace the last line to this:
-
-```sh
-roslaunch assignment5 assigment5_rectangle.launch
-```
 
 # Tests and Observations
 
