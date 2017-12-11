@@ -13,7 +13,7 @@ turtlebot_actions::TurtlebotMoveGoal createGoal(float forward_distance, float tu
 }
 
 void doneCb(const actionlib::SimpleClientGoalState& state,
-            const turtlebot_actions::TurtlebotMoveResultConstPtr& result) {
+            const turtlebot_actions::TurtlebotMoveResult::ConstPtr& result) {
 	ROS_INFO("Finished in state [%s]", state.toString().c_str());
 }
 
@@ -21,7 +21,7 @@ void activeCb() {
 	ROS_INFO("Goal just went active");
 }
 
-void feedbackCb(const turtlebot_actions::TurtlebotMoveFeedbackConstPtr& feedback) {
+void feedbackCb(const turtlebot_actions::TurtlebotMoveFeedback::ConstPtr& feedback) {
 	ROS_INFO("Dist: %f, Turn: %f ", feedback->forward_distance, feedback->turn_distance);
 }
 
@@ -35,9 +35,8 @@ void cmdCallback(const assignment5::Triangle::ConstPtr& msg)
 	float cw = msg->cw ? -1.0f : 1.0f;
 	for (int i = 0; i < 3; i++) {
 		ac.sendGoal(createGoal(msg->sideLength, 0), &doneCb, &activeCb, &feedbackCb);
-		ac.sendGoal(createGoal(0, cw * M_PI/3.0 * 2), &doneCb, &activeCb, &feedbackCb);
-	}
-	ROS_INFO("Goal sent");
+		ac.sendGoal(createGoal(0, cw * M_PI / 3.0 * 2), &doneCb, &activeCb, &feedbackCb);
+	}	
 }
 
 int main(int argc, char **argv) 
