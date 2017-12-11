@@ -5,7 +5,7 @@ add_definitions(-std=c++11)
 
 find_package(catkin REQUIRED genmsg actionlib_msgs actionlib COMPONENTS roscpp std_msgs tf)
 
-add_action_files(DIRECTORY action FILES TurtleMove.action)
+# add_action_files(DIRECTORY action FILES TurtleMove.action)
 
 add_message_files(DIRECTORY msg FILES Triangle.msg)
 
@@ -17,6 +17,3 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(move_triangle src/move_triangle.cpp)
 target_link_libraries(move_triangle ${catkin_LIBRARIES})
-
-add_executable(turtlebot_move_action_server src/turtlebot_move_action_server.cpp)
-target_link_libraries(turtlebot_move_action_server ${catkin_LIBRARIES})

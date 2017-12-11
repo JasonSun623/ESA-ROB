@@ -4,5 +4,5 @@
   <node name="Stage" pkg="stage_ros" type="stageros" args="$(find assignment5)/world/empty.world">
   </node>
   <node name="move_triangle" pkg="assignment5" type="move_triangle" output="screen"/>
-  <node name="turtlebot_move_action_server" pkg="assignment5" type="turtlebot_move_action_server" output="screen"/>
+  <node name="turtlebot_move_action_server" pkg="turtlebot_actions" type="turtlebot_move_action_server" output="screen"/>
 </launch>
