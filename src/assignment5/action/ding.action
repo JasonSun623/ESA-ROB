@@ -1,8 +1,0 @@
-# Define the goal
-uint32 goalding
----
-# Define the result
-uint32 resultding
----
-# Define a feedback message
-float32 feedbackding
