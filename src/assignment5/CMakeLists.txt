@@ -5,14 +5,11 @@ add_definitions(-std=c++11)
 
 find_package(catkin REQUIRED genmsg actionlib_msgs actionlib COMPONENTS roscpp std_msgs tf)
 
-add_message_files(
-  FILES
-  Triangle.msg
-)
-
 add_action_files(DIRECTORY action FILES TurtleMove.action)
 
-generate_messages(DEPENDENCIES actionlib_msgs)
+add_message_files(DIRECTORY msg FILES Triangle.msg)
+
+generate_messages(DEPENDENCIES std_msgs actionlib_msgs)
 
 catkin_package()
 
