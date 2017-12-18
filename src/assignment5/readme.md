@@ -25,6 +25,7 @@ cd ~/catkin_ws
 catkin_make
 source devel/setup.bash
 roslaunch assignment5 assigment5.launch
+rostopic pub -1 /cmd assignment5/Triangle -- 1.2 true
 ```
 
 
