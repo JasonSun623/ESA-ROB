@@ -6,21 +6,38 @@ typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseCl
 
 std::vector <move_base_msgs::MoveBaseGoal> createNavPoints() {
     std::vector <move_base_msgs::MoveBaseGoal> goals;
-    for(double i; i < 3.0; i++) {
-        move_base_msgs::MoveBaseGoal goal;
 
-         //we'll send a goal to the robot to move 1 meter forward
-        goal.target_pose.header.frame_id = "base_link";
-        goal.target_pose.header.stamp = ros::Time::now();
-
-        goal.target_pose.pose.position.x = i;
-        goal.target_pose.pose.orientation.w = 1;
-
-        //goal.target_pose.actionlib_msgs.pose.orientation.w = i/3.0; 
-
-        goals.push_back(goal);
-    }
-
+    move_base_msgs::MoveBaseGoal goal;
+    goal.target_pose.header.frame_id = "base_link";
+    goal.target_pose.header.stamp = ros::Time::now();
+    goal.target_pose.pose.position.x = 1.0;
+    goal.target_pose.pose.position.y = 0.0;
+    goal.target_pose.pose.orientation.w = 1;
+    goals.push_back(goal);
+    goal.target_pose.header.frame_id = "base_link";
+    goal.target_pose.header.stamp = ros::Time::now();
+    goal.target_pose.pose.position.x = 2.0;
+    goal.target_pose.pose.position.y = 0.0;
+    goal.target_pose.pose.orientation.w = 1;
+    goals.push_back(goal);
+    goal.target_pose.header.frame_id = "base_link";
+    goal.target_pose.header.stamp = ros::Time::now();
+    goal.target_pose.pose.position.x = 2.0;
+    goal.target_pose.pose.position.y = 1.0;
+    goal.target_pose.pose.orientation.w = 1;
+    goals.push_back(goal);
+    goal.target_pose.header.frame_id = "base_link";
+    goal.target_pose.header.stamp = ros::Time::now();
+    goal.target_pose.pose.position.x = 2.0;
+    goal.target_pose.pose.position.y = 2.0;
+    goal.target_pose.pose.orientation.w = 1;
+    goals.push_back(goal);
+    goal.target_pose.header.frame_id = "base_link";
+    goal.target_pose.header.stamp = ros::Time::now();
+    goal.target_pose.pose.position.x = 0.0;
+    goal.target_pose.pose.position.y = 0.0;
+    goal.target_pose.pose.orientation.w = 1;
+    goals.push_back(goal);
     return goals;
 }
 
