@@ -46,32 +46,18 @@ int main(int argc, char** argv) {
 
     std::vector <move_base_msgs::MoveBaseGoal> goals = createNavPoints();
 
-    ROS_INFO("Sending goal");
-    ac.sendGoal(goals[0]);
+    ROS_INFO("Sending goals");
 
-    ac.waitForResult();
-
-    if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
-        ROS_INFO("Hooray");
-        ac.sendGoal(goals[1]);
-
-        ac.waitForResult();
-
+    for (auto g : goals) {
         if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
-            ROS_INFO("Hooray");
-            ac.sendGoal(goals[2]);
-
+            g.target_pose.header.stamp = ros::Time::now();
+            ac.sendGoal(g);
             ac.waitForResult();
-            if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
-                ROS_INFO("Hooray");
-            }
         }
-
-
+        else {
+            ROS_WARN("The base failed to move");
+        }
     }
-    else {
-        ROS_INFO("The base failed to move forward 1 meter for some reason");
-    }
+
     return 0;
-
 }
