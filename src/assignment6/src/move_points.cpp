@@ -58,6 +58,6 @@ int main(int argc, char** argv) {
             ROS_WARN("The base failed to move");
         }
     }
-
+    getchar();
     return 0;
 }
