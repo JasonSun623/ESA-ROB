@@ -60,20 +60,31 @@ rosrun rviz rviz
 
 Rviz sends this position to `/move_base_simple/goal` and the robot wil start moving.
 
-# Code explanation
+# Creating navigator node
 
-Hoi
+## Code explanation
 
-# Running instructions
+Hallo wereld wereld, de wereld is van mij.  
+Er is ruimte zat, dus kom er lekker bij.  
+Hallo wereld wereld, de wereld is van jou.  
+Er zijn wel duizend kleuren, veel meer dan rood-wit-blauw.  
+En wat ik doe doe doe, doe ik samen met jou,  
+en waar ik ga ga ga, ga ik samen met jou.  
+Hallo wereld, hééééééé!  
+Ja jij, je bent van ons allemaal.  
 
-Hallo wereld wereld, de wereld is van mij. 
-Er is ruimte zat, dus kom er lekker bij.
-Hallo wereld wereld, de wereld is van jou. 
-Er zijn wel duizend kleuren, veel meer dan rood-wit-blauw.
-En wat ik doe doe doe, doe ik samen met jou,
-en waar ik ga ga ga, ga ik samen met jou.
-Hallo wereld, hééééééé!
-Ja jij, je bent van ons allemaal.
+## Running instructions
+
+First we have to start the navigation stack as described above.
+
+As with the previous assignments, the steps are similar to get the program started:
+
+```sh
+cd ~/catkin_ws
+catkin_make
+source devel/setup.bash
+roslaunch assignment6 assigment6.launch
+```
 
 # Tests and observations
 
@@ -83,6 +94,6 @@ For the project we did some tests on the robot navigation precision and drift ov
 
 For ESA-ROB, we also recorded the mapping and navigation test with our current navigation stack for the project. 
 
-[YouTube screencapture](https://youtu.be/D0OkfzULC9E)
+[YouTube screencapture](https://youtu.be/D0OkfzULC9E)  
 [YouTube real-life](https://youtu.be/NuBk4oz7AMQ)
 
