@@ -44,24 +44,56 @@ The slow movement speed should always be used, unless navigating is not necessar
 
 #  Moving the robot - AMCL
 
+The robot can be told to autonomously move using Rviz, we start the navigation stack using the following launch file.
+ 
+```sh
+roslaunch faw costmap_test.launch
+```
 
+This will start the ros navigation stack and all of our custom nodes: the nodes for getting data from the Lidars, the youbot driver, the map server, the move base node and then our custom nodes, a emergency stop, a node for controlling the robot with a controller and a node for creating an extra costmap layer that creates zones for no-go zones that the robot can’t drive through.
 
+We then start Rviz so we can give Nav 2D goals to the robot base:
+ 
+```sh
+rosrun rviz rviz
+```
 
+Rviz sends this position to `/move_base_simple/goal` and the robot wil start moving.
 
+# Creating navigator node
 
-# Code explanation
+## Code explanation
 
-Hoi
+Hallo wereld wereld, de wereld is van mij.  
+Er is ruimte zat, dus kom er lekker bij.  
+Hallo wereld wereld, de wereld is van jou.  
+Er zijn wel duizend kleuren, veel meer dan rood-wit-blauw.  
+En wat ik doe doe doe, doe ik samen met jou,  
+en waar ik ga ga ga, ga ik samen met jou.  
+Hallo wereld, hééééééé!  
+Ja jij, je bent van ons allemaal.  
 
-# Running instructions
+## Running instructions
 
-Hallo wereld wereld, de wereld is van mij. 
-Er is ruimte zat, dus kom er lekker bij.
-Hallo wereld wereld, de wereld is van jou. 
-Er zijn wel duizend kleuren, veel meer dan rood-wit-blauw.
-En wat ik doe doe doe, doe ik samen met jou,
-en waar ik ga ga ga, ga ik samen met jou.
-Hallo wereld, hééééééé!
-Ja jij, je bent van ons allemaal.
+First we have to start the navigation stack as described above.
+
+As with the previous assignments, the steps are similar to get the program started:
+
+```sh
+cd ~/catkin_ws
+catkin_make
+source devel/setup.bash
+roslaunch assignment6 assigment6.launch
+```
 
 # Tests and observations
+
+For the project we did some tests on the robot navigation precision and drift over time. The results of this and the various parameters we changed can be found in the following document:
+
+[Testing movement precision](https://github.com/minhtrietdiep/ESA-PROJ/wiki/NavPrecisionTest.pdf)
+
+For ESA-ROB, we also recorded the mapping and navigation test with our current navigation stack for the project. 
+
+[YouTube screencapture](https://youtu.be/D0OkfzULC9E)  
+[YouTube real-life](https://youtu.be/NuBk4oz7AMQ)
+
