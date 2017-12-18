@@ -1,7 +1,7 @@
 ESA-ROS Assignment 6
 --------------------
 
-Minh-Triet Diep, Lars Jaeqx
+Minh-Triet Diep, Lars Jaeqx, Luuk van Rossum, Hubert Heijnen
 
 # Creating a map - Gmapping / SLAM
 
