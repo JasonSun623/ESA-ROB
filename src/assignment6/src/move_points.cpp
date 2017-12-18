@@ -49,12 +49,11 @@ int main(int argc, char** argv) {
     ROS_INFO("Sending goals");
 
     for (auto g : goals) {
-        if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
-            g.target_pose.header.stamp = ros::Time::now();
-            ac.sendGoal(g);
-            ac.waitForResult();
-        }
-        else {
+        g.target_pose.header.stamp = ros::Time::now();
+        ac.sendGoal(g);
+        ac.waitForResult();
+
+        if(ac.getState() != actionlib::SimpleClientGoalState::SUCCEEDED) {
             ROS_WARN("The base failed to move");
         }
     }
