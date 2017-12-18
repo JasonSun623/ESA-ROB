@@ -8,35 +8,27 @@ std::vector <move_base_msgs::MoveBaseGoal> createNavPoints() {
     std::vector <move_base_msgs::MoveBaseGoal> goals;
 
     move_base_msgs::MoveBaseGoal goal;
-    goal.target_pose.header.frame_id = "base_link";
+    goal.target_pose.header.frame_id = "map";
     goal.target_pose.header.stamp = ros::Time::now();
     goal.target_pose.pose.position.x = 1.0;
     goal.target_pose.pose.position.y = 0.0;
     goal.target_pose.pose.orientation.w = 1;
     goals.push_back(goal);
-    goal.target_pose.header.frame_id = "base_link";
     goal.target_pose.header.stamp = ros::Time::now();
     goal.target_pose.pose.position.x = 2.0;
     goal.target_pose.pose.position.y = 0.0;
-    goal.target_pose.pose.orientation.w = 1;
     goals.push_back(goal);
-    goal.target_pose.header.frame_id = "base_link";
     goal.target_pose.header.stamp = ros::Time::now();
     goal.target_pose.pose.position.x = 2.0;
     goal.target_pose.pose.position.y = 1.0;
-    goal.target_pose.pose.orientation.w = 1;
     goals.push_back(goal);
-    goal.target_pose.header.frame_id = "base_link";
     goal.target_pose.header.stamp = ros::Time::now();
     goal.target_pose.pose.position.x = 2.0;
     goal.target_pose.pose.position.y = 2.0;
-    goal.target_pose.pose.orientation.w = 1;
     goals.push_back(goal);
-    goal.target_pose.header.frame_id = "base_link";
     goal.target_pose.header.stamp = ros::Time::now();
     goal.target_pose.pose.position.x = 0.0;
     goal.target_pose.pose.position.y = 0.0;
-    goal.target_pose.pose.orientation.w = 1;
     goals.push_back(goal);
     return goals;
 }
