@@ -34,6 +34,5 @@ During testing we saw the robot behaving like we expected, executing the 6 tasks
 
 We also wanted to print feedback with callbacks, but we didn't see this in the terminal window. We tried to figure out why this was like this, but didn't manage to find out to get it to work. The arguments are done in a similar way to examples and we checked the API, but everything seemed right.
 
-# Graph 
+[YouTube result](https://youtu.be/dDmTUc4Fod8)
 
-![Graph](./assignment5-rosgraph.png)
