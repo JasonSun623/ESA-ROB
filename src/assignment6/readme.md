@@ -64,6 +64,8 @@ Rviz sends this position to `/move_base_simple/goal` and the robot wil start mov
 
 ## Code explanation
 
+Using the [example](http://wiki.ros.org/navigation/Tutorials/SendingSimpleGoals) we’ve build a simple client that sends a couple goals to move_base. It sends a goal and if the robot succeeds in reaching this goal it will send the next goal.
+
 Hallo wereld wereld, de wereld is van mij.  
 Er is ruimte zat, dus kom er lekker bij.  
 Hallo wereld wereld, de wereld is van jou.  
@@ -96,4 +98,8 @@ For ESA-ROB, we also recorded the mapping and navigation test with our current n
 
 [YouTube screencapture](https://youtu.be/D0OkfzULC9E)  
 [YouTube real-life](https://youtu.be/NuBk4oz7AMQ)
+
+Now we created the navigator node and tested the results.
+
+[YouTube navigator node](https://youtu.be/nKLArBWd_xw)
 
