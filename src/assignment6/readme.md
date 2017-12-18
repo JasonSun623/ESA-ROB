@@ -64,16 +64,7 @@ Rviz sends this position to `/move_base_simple/goal` and the robot wil start mov
 
 ## Code explanation
 
-Using the [example](http://wiki.ros.org/navigation/Tutorials/SendingSimpleGoals) we’ve build a simple client that sends a couple goals to move_base. It sends a goal and if the robot succeeds in reaching this goal it will send the next goal.
-
-Hallo wereld wereld, de wereld is van mij.  
-Er is ruimte zat, dus kom er lekker bij.  
-Hallo wereld wereld, de wereld is van jou.  
-Er zijn wel duizend kleuren, veel meer dan rood-wit-blauw.  
-En wat ik doe doe doe, doe ik samen met jou,  
-en waar ik ga ga ga, ga ik samen met jou.  
-Hallo wereld, hééééééé!  
-Ja jij, je bent van ons allemaal.  
+Using the [example](http://wiki.ros.org/navigation/Tutorials/SendingSimpleGoals) we’ve build a simple client that sends a couple goals to move_base. We chose the points by driving the robot around the map, and saved the coordinates and rotations with our GUI. It sends a goal, and if the robot succeeds in reaching this goal, it will send the next goal. This continues until all goals are reached.
 
 ## Running instructions
 
