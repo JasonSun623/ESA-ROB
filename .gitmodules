@@ -1,0 +1,3 @@
+[submodule "src/mines-ros"]
+	path = src/mines-ros
+	url = http://github.com/fhict/mines-ros/
