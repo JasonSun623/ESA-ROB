@@ -11,20 +11,20 @@ struct TwistWrapper {
  */
 class Arbiter {
 public:
-	// members
+  // members
 
-	// methods
+  // methods
   Arbiter();
   
 protected:
-	// members
+  // members
   int rate_;
   ros::NodeHandle nh_;
   ros::Publisher cmd_vel_pub_;
   ros::Subscriber cmd_vel0_, cmd_vel1_, cmd_vel2_;
   ros::Timer timer_;
 
-	// methods
+  // methods
   void update();
   void cmdCallback0(const geometry_msgs::Twist::ConstPtr& cmd);
   void cmdCallback1(const geometry_msgs::Twist::ConstPtr& cmd);
