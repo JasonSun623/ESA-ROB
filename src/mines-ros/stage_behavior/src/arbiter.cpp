@@ -19,10 +19,10 @@ public:
 protected:
 	// members
   int rate_;
-	ros::NodeHandle nh_;
+  ros::NodeHandle nh_;
   ros::Publisher cmd_vel_pub_;
   ros::Subscriber cmd_vel0_, cmd_vel1_, cmd_vel2_;
-	ros::Timer timer_;
+  ros::Timer timer_;
 
 	// methods
   void update();
