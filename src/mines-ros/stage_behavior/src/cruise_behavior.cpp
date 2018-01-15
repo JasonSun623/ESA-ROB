@@ -64,7 +64,7 @@ void CruiseBehavior::update(void)
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "escape_behavior");
+  ros::init(argc, argv, "cruise_behavior");
   CruiseBehavior cruise_behavior;
   ros::spin();
 

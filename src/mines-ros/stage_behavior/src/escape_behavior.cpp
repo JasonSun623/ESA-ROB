@@ -1,41 +1,37 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/LaserScan.h>
-
+#include <std_msgs/String.h>
 /**
  * Escape behavior makes the robot backoff and turn when too close to obstacle
  */
-class EscapeBehavior
+class EscapeBehavior 
 {
 public:
-	// members
-
-	// methods
   EscapeBehavior();
 
 protected:
-	// members
 	ros::NodeHandle nh_,ph_;
-    ros::Subscriber scan_sub_;
-    ros::Publisher vel_pub_;
+  ros::Subscriber scan_sub_;
+  ros::Publisher vel_pub_, esc_pub_;
 	ros::Timer timer_;
 
 	int rate_; // update and publish rate (Hz)
 
-    enum State
-    {
-      IDLE,
-      BACKOFF,
-      TURN,
-    };
-    State state_; // state of escape procedure
+  enum State
+  {
+    IDLE,
+    BACKOFF,
+    TURN,
+  };
+  State state_; // state of escape procedure
 	ros::Time until_; // time until next state
 
 	bool scan_received_; // at least one scan has been received
 	double closest_distance_; // distance to closest object (m)
 	double robot_size_; // size or diameter of robot (m)
 	double bump_distance_; // robot size plus safety margin (m)
-    double backoff_dur_; // duration of backoff (s)
+  double backoff_dur_; // duration of backoff (s)
 	double backoff_vel_; // linear backoff velocity (m/s)
 	double turn_dur_; // duration of turn (s)
 	double turn_vel_; // angular turn velocity (rad/s)
@@ -45,6 +41,7 @@ protected:
 	void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg);
 	bool isTriggered(void);
 	void update(void);
+  void notify();
 };
 
 ///////////////////////////////////////////////////////////////////////////
@@ -70,8 +67,16 @@ EscapeBehavior::EscapeBehavior():
   ph_.param("robot_size", robot_size_, robot_size_);
 
   vel_pub_ = nh_.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+  esc_pub_ = nh_.advertise<std_msgs::String>("esc_trig", 1);
+
   scan_sub_ = nh_.subscribe<sensor_msgs::LaserScan>("/scan", 100, &EscapeBehavior::scanCallback, this);
   timer_ = nh_.createTimer(ros::Duration(1.0/rate_), boost::bind(&EscapeBehavior::update, this));
+}
+
+void EscapeBehavior::notify() {
+  std_msgs::String msg;
+  msg.data = "bump";
+  esc_pub_.publish(msg);
 }
 
 void EscapeBehavior::publish(double angular, double linear)  
@@ -92,7 +97,7 @@ void EscapeBehavior::scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_
     if ((range > scan_msg->range_min) && (range > robot_size_) && (range < closest_distance_)) 
     { // closest distance to obstacle, excluding parts of the robot
       closest_distance_ = range;
-	  ROS_DEBUG("closest_distance: %f", closest_distance_);
+	    ROS_DEBUG("closest_distance: %f", closest_distance_);
     }
   }
   scan_received_ = true; // we have received a scan
@@ -125,7 +130,7 @@ void EscapeBehavior::update(void)
       if(now < until_)
       {
         // backoff
-		publish(0.0,-1*backoff_vel_);
+		    publish(0.0,-1*backoff_vel_);
       } else {
         state_ = TURN;
         until_ = ros::Time::now() + ros::Duration(turn_dur_);
@@ -136,9 +141,10 @@ void EscapeBehavior::update(void)
       if(now < until_)
       {
         // turn
-		publish(turn_vel_,0.0);
+		    publish(turn_vel_,0.0);
       } else {
         state_ = IDLE;
+        notify();
       }        
       break;
     default:

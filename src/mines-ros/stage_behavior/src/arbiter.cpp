@@ -21,7 +21,7 @@ protected:
   int rate_;
   ros::NodeHandle nh_;
   ros::Publisher cmd_vel_pub_;
-  ros::Subscriber cmd_vel0_, cmd_vel1_, cmd_vel2_;
+  ros::Subscriber cmd_vel0_, cmd_vel1_, cmd_vel2_, cmd_vel3_;
   ros::Timer timer_;
 
   // methods
@@ -30,6 +30,7 @@ protected:
   void cmdCallback0(const geometry_msgs::Twist::ConstPtr& cmd);
   void cmdCallback1(const geometry_msgs::Twist::ConstPtr& cmd);
   void cmdCallback2(const geometry_msgs::Twist::ConstPtr& cmd);
+  void cmdCallback3(const geometry_msgs::Twist::ConstPtr& cmd);
 
   TwistWrapper prioMsg_;
 };
@@ -40,6 +41,7 @@ Arbiter::Arbiter() : rate_(100) {
   cmd_vel0_ = nh_.subscribe<geometry_msgs::Twist>("cmd_vel0", 100, &Arbiter::cmdCallback0, this);
   cmd_vel1_ = nh_.subscribe<geometry_msgs::Twist>("cmd_vel1", 100, &Arbiter::cmdCallback1, this);
   cmd_vel2_ = nh_.subscribe<geometry_msgs::Twist>("cmd_vel2", 100, &Arbiter::cmdCallback2, this);
+  cmd_vel3_ = nh_.subscribe<geometry_msgs::Twist>("cmd_vel3", 100, &Arbiter::cmdCallback3, this);
 
   cmd_vel_pub_ = nh_.advertise<geometry_msgs::Twist>("cmd_vel", 1);
   timer_ = nh_.createTimer(ros::Duration(1.0/rate_), boost::bind(&Arbiter::update, this));
@@ -69,6 +71,10 @@ void Arbiter::cmdCallback1(const geometry_msgs::Twist::ConstPtr& cmd) {
 
 void Arbiter::cmdCallback2(const geometry_msgs::Twist::ConstPtr& cmd) {
   updatePrioMsg(cmd, 2);
+}
+
+void Arbiter::cmdCallback3(const geometry_msgs::Twist::ConstPtr& cmd) {
+  updatePrioMsg(cmd, 3);
 }
 
 int main(int argc, char **argv) {

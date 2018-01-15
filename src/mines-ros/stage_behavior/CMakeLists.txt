@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(stage_behavior)
 
+add_definitions(-std=c++11)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -10,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -109,6 +112,7 @@ include_directories(
 add_executable(arbiter src/arbiter.cpp)
 add_executable(cruise_behavior src/cruise_behavior.cpp)
 add_executable(escape_behavior src/escape_behavior.cpp)
+add_executable(seek_behavior src/seek_behavior.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -122,6 +126,9 @@ target_link_libraries(cruise_behavior
    ${catkin_LIBRARIES}
 )
 target_link_libraries(escape_behavior
+   ${catkin_LIBRARIES}
+)
+target_link_libraries(seek_behavior
    ${catkin_LIBRARIES}
 )
 
