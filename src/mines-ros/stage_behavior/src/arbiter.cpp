@@ -26,6 +26,7 @@ protected:
 
   // methods
   void update();
+  void updatePrioMsg(const geometry_msgs::Twist::ConstPtr& cmd, int prio);
   void cmdCallback0(const geometry_msgs::Twist::ConstPtr& cmd);
   void cmdCallback1(const geometry_msgs::Twist::ConstPtr& cmd);
   void cmdCallback2(const geometry_msgs::Twist::ConstPtr& cmd);
@@ -51,23 +52,23 @@ void Arbiter::update() {
   }
 }
 
+void Arbiter::updatePrioMsg(const geometry_msgs::Twist::ConstPtr& cmd, int prio) {
+  if (prioMsg_.prio == -1 || prioMsg_.prio >= prio) {
+    prioMsg_.vel = *cmd;
+    prioMsg_.prio = prio;
+  }
+}
+
 void Arbiter::cmdCallback0(const geometry_msgs::Twist::ConstPtr& cmd) {
-  prioMsg_.vel = *cmd;
-  prioMsg_.prio = 0;
+  updatePrioMsg(cmd, 0);
 }
 
 void Arbiter::cmdCallback1(const geometry_msgs::Twist::ConstPtr& cmd) {
-  if (prioMsg_.prio == -1 || prioMsg_.prio >= 1) {
-    prioMsg_.vel = *cmd;
-    prioMsg_.prio = 1;
-  }
+  updatePrioMsg(cmd, 1);
 }
 
 void Arbiter::cmdCallback2(const geometry_msgs::Twist::ConstPtr& cmd) {
-  if (prioMsg_.prio == -1 || prioMsg_.prio >= 2) {
-    prioMsg_.vel = *cmd;
-    prioMsg_.prio = 2;
-  }
+  updatePrioMsg(cmd, 2);
 }
 
 int main(int argc, char **argv) {
