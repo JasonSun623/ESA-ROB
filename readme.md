@@ -11,4 +11,5 @@ Minh-Triet Diep, Lars Jaeqx
 [Assignment 4](https://github.com/MrJaeqx/ESA-ROB/tree/master/src/assignment4)  
 [Assignment 5](https://github.com/MrJaeqx/ESA-ROB/tree/master/src/assignment5)  
 [Assignment 6](https://github.com/MrJaeqx/ESA-ROB/tree/master/src/assignment6)  
-[Assignment 7](https://github.com/MrJaeqx/ESA-ROB/tree/master/src/assignment7)  
+[Assignment 7](https://github.com/MrJaeqx/ESA-ROB/tree/master/src/mines-ros)  
+

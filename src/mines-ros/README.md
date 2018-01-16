@@ -61,3 +61,10 @@ During testing we saw the robot behaving like we expected, but not in the optima
 This is that result: [Video](https://streamable.com/5s03o)
 
 We think it could've worked much better with some path planning, but that was outside the scope of the requirements.
+
+Graph
+-----
+
+![Graph](rosgraph.png)
+
+The cruise behavior has been disabled for the test and thus doesn't show up.
